@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import LoadingScreen from "../components/LoadingScreen";
-const API_URL =process.env.REACT_APP_API_URL;
+const API_URL = process.env.REACT_APP_API_URL;
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -53,8 +53,11 @@ function LoginPage() {
           body: JSON.stringify(formData),
         });
 
+        console.log("API response:", response); // Debugging API response
+
         if (response.ok) {
           const data = await response.json();
+          console.log("Login successful:", data); // Debugging login success
           localStorage.setItem("token", data.token);
           localStorage.setItem("user", JSON.stringify({ username: data.username, email: data.email }));
           setTimeout(() => {
@@ -63,10 +66,16 @@ function LoginPage() {
           }, 1000);
         } else {
           const errorData = await response.json();
-          setErrors({ form: errorData.message });
+          console.log("Error data:", errorData); // Debugging error response
+          if (response.status === 401) {
+            setErrors({ form: "Invalid credentials. Please try again." });
+          } else {
+            setErrors({ form: errorData.message || "An error occurred. Please try again later." });
+          }
           setIsLoading(false);
         }
       } catch (error) {
+        console.error("Error during login:", error);
         setErrors({ form: "An error occurred. Please try again later." });
         setIsLoading(false);
       }
@@ -86,9 +95,7 @@ function LoginPage() {
 
       <div className="flex justify-center items-center flex-grow px-4 py-8">
         <div className="bg-black p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-xs sm:max-w-sm">
-          <h2 className="text-xl text-white text-center mb-4">
-            Login to Your Account
-          </h2>
+          <h2 className="text-xl text-white text-center mb-4">Login to Your Account</h2>
           <form onSubmit={handleSubmit}>
             <div className="mb-3">
               <label htmlFor="username" className="text-gray-400 text-sm">
