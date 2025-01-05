@@ -104,7 +104,7 @@ const KYCPage = () => {
     formData.append("backText", backText);
 
     try {
-      const response = await axios.post(`${API_URL}api/kyc/submit`, formData, {
+      const response = await axios.post(`${API_URL}/api/kyc/submit`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

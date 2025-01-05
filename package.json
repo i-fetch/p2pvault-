@@ -74,6 +74,8 @@
 },
 
   "scripts":{
-    "preinstall": "npx npm-force-resolutions"
+    "preinstall": "npx npm-force-resolutions",
+    "start": "react-scripts start"
+
 }
 }

@@ -136,7 +136,7 @@ const Sidebar = () => {
       {/* Mobile Toggle Button */}
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
-        className="p-4 bg-blue-500 text-white fixed bottom-16 right-4 rounded-full shadow-lg md:hidden"
+        className="p-4 bg-pink-500 text-white fixed bottom-16 right-4 rounded-full shadow-lg md:hidden"
       >
         <FaBars />
       </button>
