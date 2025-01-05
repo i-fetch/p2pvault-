@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import LoadingScreen from "../components/LoadingScreen";
-const API_URL = process.env.REACT_APP_API_URL;
+
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -45,7 +45,7 @@ function LoginPage() {
     } else {
       setIsLoading(true);
       try {
-        const response = await fetch(`${API_URL}/api/users/login`, {
+        const response = await fetch(`https://p2pvaultuserbackend-production.up.railway.app/api/users/login`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

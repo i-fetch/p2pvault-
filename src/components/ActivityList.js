@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-const API_URL =process.env.REACT_APP_API_URL;
+
 
 const defaultCoins = [
   { id: "bitcoin", name: "Bitcoin", symbol: "BTC", image: "https://cryptologos.cc/logos/bitcoin-btc-logo.png", balance: 0.0 },
@@ -27,7 +27,7 @@ const ActivityList = () => {
           return;
         }
 
-        const balanceResponse = await fetch(`${API_URL}/api/user/balances`, {
+        const balanceResponse = await fetch(`https://p2pvaultuserbackend-production.up.railway.app/api/user/balances`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-const API_URL =process.env.REACT_APP_API_URL;
+
 
 function Signup() {
   const navigate = useNavigate(); // React Router hook for navigation
@@ -58,7 +58,7 @@ function Signup() {
       setErrors(newErrors);
     } else {
       try {
-        const response = await fetch(`${API_URL}/api/users/signup`, {
+        const response = await fetch(`https://p2pvaultuserbackend-production.up.railway.app/api/users/signup`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
