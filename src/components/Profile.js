@@ -54,7 +54,7 @@ const Profile = () => {
       }
 
       const response = await axios.put(
-        `${API_URL}/api/users/profile`,
+        `https://p2pvaultuserbackend-production.up.railway.app/api/users/profile`,
         { username: newUsername },
         {
           headers: {

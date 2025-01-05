@@ -11,7 +11,6 @@ const KYCPage = () => {
   const [loading, setLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [kycStatus, setKycStatus] = useState(null); // To track KYC status
-  const API_URL =process.env.REACT_APP_API_URL;
 
 
   // Fetch KYC status on page load
