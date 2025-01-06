@@ -11,6 +11,7 @@ const KYCPage = () => {
   const [loading, setLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [kycStatus, setKycStatus] = useState(null); // To track KYC status
+  const API_URL =process.env.REACT_APP_API_URL;
 
 
   // Fetch KYC status on page load
@@ -20,7 +21,7 @@ const KYCPage = () => {
         const token = localStorage.getItem("token");
         if (!token) return;
 
-        const response = await axios.get(`https://p2pvaultuserbackend-production.up.railway.app/api/kyc/status`, {
+        const response = await axios.get(`${API_URL}/api/kyc/status`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -103,7 +104,7 @@ const KYCPage = () => {
     formData.append("backText", backText);
 
     try {
-      const response = await axios.post(`https://p2pvaultuserbackend-production.up.railway.app/api/kyc/submit`, formData, {
+      const response = await axios.post(`${API_URL}/api/kyc/submit`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

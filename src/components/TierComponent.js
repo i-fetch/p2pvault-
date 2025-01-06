@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-
+const API_URL =process.env.REACT_APP_API_URL2;
 
 
 const TierComponent = ({ userTier, userId }) => {
@@ -16,7 +16,7 @@ const TierComponent = ({ userTier, userId }) => {
   // Fetch tier request status and user tier
   const fetchTierRequestStatus = async () => {
     try {
-      const response = await axios.get(`https://p2pvaultuserbackend-production.up.railway.app/api/users/tier-upgrade/status`, {
+      const response = await axios.get(`${API_URL}/api/users/tier-upgrade/status`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
 
@@ -55,7 +55,7 @@ const TierComponent = ({ userTier, userId }) => {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        `https://p2pvaultuserbackend-production.up.railway.app/api/users/tier-upgrade`,
+        `${API_URL}/api/users/tier-upgrade`,
         { tierLevel: selectedLevel === "Elite Level" ? 2 : 3 },
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },

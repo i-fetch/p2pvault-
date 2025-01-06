@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-
+const API_URL =process.env.REACT_APP_API_URL;
 
 
 const Profile = () => {
@@ -23,7 +23,7 @@ const Profile = () => {
         }
 
         // Fetch user profile data from backend
-        const response = await axios.get(`https://p2pvaultuserbackend-production.up.railway.app/api/users/profile`, {
+        const response = await axios.get(`${API_URL}/api/users/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -54,7 +54,7 @@ const Profile = () => {
       }
 
       const response = await axios.put(
-        `https://p2pvaultuserbackend-production.up.railway.app/api/users/profile`,
+        `${API_URL}/api/users/profile`,
         { username: newUsername },
         {
           headers: {

@@ -9,7 +9,7 @@ const BalanceCard = ({ userTier = "Basic Level" }) => {
   const [username, setUsername] = useState("");
   const [walletID, setWalletID] = useState(""); // State for wallet ID
   const navigate = useNavigate();
-  
+  const API_URL =process.env.REACT_APP_API_URL2;
 
 
   // Define the default coin data
@@ -34,7 +34,7 @@ const BalanceCard = ({ userTier = "Basic Level" }) => {
 
       try {
         // Fetch user profile
-        const response = await axios.get("https://p2pvaultuserbackend-production.up.railway.app/api/users/profile", {
+        const response = await axios.get("/api/users/profile", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -42,7 +42,7 @@ const BalanceCard = ({ userTier = "Basic Level" }) => {
         setWalletID(response.data.wallet_id); // Set wallet ID from response
 
         // Fetch coin balances
-        const balanceResponse = await fetch(`https://p2pvaultuserbackend-production.up.railway.app/api/user/balances`, {
+        const balanceResponse = await fetch(`${API_URL}/api/user/balances`, {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
         });
