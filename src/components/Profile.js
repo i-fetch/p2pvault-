@@ -23,7 +23,7 @@ const Profile = () => {
         }
 
         // Fetch user profile data from backend
-        const response = await axios.get(`${API_URL}/api/users/profile`, {
+        const response = await axios.get(`${API_URL}api/users/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -54,7 +54,7 @@ const Profile = () => {
       }
 
       const response = await axios.put(
-        `${API_URL}/api/users/profile`,
+        `${API_URL}api/users/profile`,
         { username: newUsername },
         {
           headers: {

@@ -58,7 +58,7 @@ function Signup() {
       setErrors(newErrors);
     } else {
       try {
-        const response = await fetch(`${API_URL}/api/users/signup`, {
+        const response = await fetch(`${API_URL}api/users/signup`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
