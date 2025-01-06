@@ -16,7 +16,7 @@ const TierComponent = ({ userTier, userId }) => {
   // Fetch tier request status and user tier
   const fetchTierRequestStatus = async () => {
     try {
-      const response = await axios.get(`${API_URL}api/users/tier-upgrade/status`, {
+      const response = await axios.get(`${API_URL}/api/users/tier-upgrade/status`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
 

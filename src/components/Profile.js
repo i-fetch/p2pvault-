@@ -54,7 +54,7 @@ const Profile = () => {
       }
 
       const response = await axios.put(
-        `${API_URL}api/users/profile`,
+        `${API_URL}/api/users/profile`,
         { username: newUsername },
         {
           headers: {

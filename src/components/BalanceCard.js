@@ -34,7 +34,7 @@ const BalanceCard = ({ userTier = "Basic Level" }) => {
 
       try {
         // Fetch user profile
-        const response = await axios.get("/api/users/profile", {
+        const response = await axios.get("${API_URL}/api/users/profile", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
