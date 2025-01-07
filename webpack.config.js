@@ -4,7 +4,7 @@ module.exports = {
     // ...
 
     devServer: {
-        allowedHosts: ['localhost', '.yourdomain.com'], // Specify allowed hosts
+        allowedHosts: ['localhost', 'https://www.p2pvaults.com/'], // Specify allowed hosts
         // other dev server options
     },
 

@@ -2,7 +2,7 @@
   "name": "wallet-dashboard",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://localhost:5000",
+  "proxy": "p2pvaultuserbackend-production.up.railway.app",
 
   "dependencies": {
     "@solana/web3.js": "^1.98.0",
