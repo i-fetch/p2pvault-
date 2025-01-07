@@ -136,6 +136,7 @@ const TierComponent = ({ userTier, userId }) => {
     const options = [];
     const upgradeRequested = localStorage.getItem("upgradeRequested");
 
+    
     if (
       currentUserTier < 3 &&
       !isUpgradeSelected &&
