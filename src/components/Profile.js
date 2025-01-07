@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-const API_URL =process.env.REACT_APP_API_URL;
+const API_URL =process.env.REACT_APP_API_URL2;
 
 
 const Profile = () => {
