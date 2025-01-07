@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-const API_URL =process.env.REACT_APP_API_URL2;
-
+const API_URL = process.env.REACT_APP_API_URL2;
 
 const TierComponent = ({ userTier, userId }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -45,40 +44,6 @@ const TierComponent = ({ userTier, userId }) => {
       localStorage.removeItem("upgradeRequested");
     }
   }, [currentTierRequestStatus]);
-
-  const handleUpgradeClick = (level) => {
-    setSelectedLevel(level);
-    setIsModalOpen(true);
-  };
-
-  const confirmUpgrade = async () => {
-    setIsLoading(true);
-    try {
-      const response = await axios.post(
-        `${API_URL}/api/users/tier-upgrade`,
-        { tierLevel: selectedLevel === "Elite Level" ? 2 : 3 },
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
-      );
-
-      setRequestSubmitted(true);
-      setIsUpgradeSelected(true);
-      setIsModalOpen(false);
-
-      localStorage.setItem("upgradeRequested", "true");
-    } catch (error) {
-      setErrorMessage(
-        error.response?.data?.message || "An error occurred while requesting an upgrade."
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const cancelUpgrade = () => {
-    setIsModalOpen(false);
-  };
 
   const tierBenefits = {
     1: {
@@ -129,51 +94,7 @@ const TierComponent = ({ userTier, userId }) => {
       );
     }
 
-    return renderUpgradeOptions();
-  };
-
-  const renderUpgradeOptions = () => {
-    const options = [];
-    const upgradeRequested = localStorage.getItem("upgradeRequested");
-
-    
-    if (
-      currentUserTier < 3 &&
-      !isUpgradeSelected &&
-      currentTierRequestStatus !== "approved" &&
-      !upgradeRequested
-    ) {
-      options.push(
-        <button
-          key="upgrade-premium"
-          onClick={() => handleUpgradeClick("Premium Level")}
-          className="w-full py-2 bg-green-900 text-white rounded-lg hover:bg-green-600"
-          disabled={isLoading}
-        >
-          {isLoading ? "Requesting..." : "Upgrade to Premium Level"}
-        </button>
-      );
-    }
-
-    if (
-      currentUserTier < 2 &&
-      !isUpgradeSelected &&
-      currentTierRequestStatus !== "approved" &&
-      !upgradeRequested
-    ) {
-      options.push(
-        <button
-          key="upgrade-elite"
-          onClick={() => handleUpgradeClick("Elite Level")}
-          className="w-full py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-600 mb-4"
-          disabled={isLoading}
-        >
-          {isLoading ? "Requesting..." : "Upgrade to Elite Level"}
-        </button>
-      );
-    }
-
-    return options.length > 0 ? options : <p>No upgrades available at this time.</p>;
+    return <p>No upgrades available at this time.</p>;
   };
 
   return (
@@ -210,14 +131,14 @@ const TierComponent = ({ userTier, userId }) => {
             </p>
             <div className="flex justify-end gap-2 mt-4">
               <button
-                onClick={confirmUpgrade}
+                onClick={() => {}}
                 className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition"
                 disabled={isLoading}
               >
                 Confirm
               </button>
               <button
-                onClick={cancelUpgrade}
+                onClick={() => setIsModalOpen(false)}
                 className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition"
               >
                 Cancel
