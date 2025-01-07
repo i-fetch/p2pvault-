@@ -55,7 +55,7 @@ const TierComponent = ({ userTier, userId }) => {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        `${API_URL}api/users/tier-upgrade`,
+        `${API_URL}/api/users/tier-upgrade`,
         { tierLevel: selectedLevel === "Elite Level" ? 2 : 3 },
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },

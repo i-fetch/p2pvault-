@@ -21,7 +21,7 @@ const KYCPage = () => {
         const token = localStorage.getItem("token");
         if (!token) return;
 
-        const response = await axios.get(`${API_URL}api/kyc/status`, {
+        const response = await axios.get(`${API_URL}/api/kyc/status`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

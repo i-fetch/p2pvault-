@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+const API_URL =process.env.REACT_APP_API_URL2;
 
 
 const defaultCoins = [
@@ -27,26 +29,21 @@ const ActivityList = () => {
           return;
         }
 
-        const balanceResponse = await fetch(`https://p2pvaultuserbackend-production.up.railway.app/api/user/balances`, {
-          method: "GET",
+        // Fetch user balances
+        const balanceResponse = await axios.get(`${API_URL}/api/users/balances`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
 
-        if (!balanceResponse.ok) {
-          const errorText = await balanceResponse.text();
-          console.error("Error response from backend:", errorText);
-          throw new Error("Failed to fetch user balances. Please check your backend.");
-        }
-
-        const balanceData = await balanceResponse.json();
+        const balanceData = balanceResponse.data; // Axios automatically parses JSON
         if (!balanceData.success) {
           throw new Error(balanceData.message || "Failed to fetch user balances.");
         }
 
         const userBalances = balanceData.balances;
 
+        // Fetch market data
         const coinIds = defaultCoins.map((coin) => coin.id).join(",");
         const marketResponse = await fetch(
           `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${coinIds}&order=market_cap_desc&sparkline=false`
@@ -60,6 +57,7 @@ const ActivityList = () => {
 
         const marketData = await marketResponse.json();
 
+        // Merge user balances with market data
         const updatedCoins = defaultCoins.map((coin) => {
           const marketInfo = marketData.find((data) => data.id === coin.id);
           return {

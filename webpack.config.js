@@ -3,6 +3,11 @@ const webpack = require('webpack');
 module.exports = {
     // ...
 
+    devServer: {
+        allowedHosts: ['localhost', '.yourdomain.com'], // Specify allowed hosts
+        // other dev server options
+    },
+
     plugins: [
         // Work around for Buffer is undefined:
         // https://github.com/webpack/changelog-v5/issues/10
@@ -13,6 +18,7 @@ module.exports = {
             process: 'process/browser',
         }),
     ],
+
     resolve: {
         extensions: ['.js', '.jsx', '.ts', '.tsx', '.mjs'], // Include .mjs files        
         fallback: {
@@ -20,4 +26,4 @@ module.exports = {
             "buffer": require.resolve("buffer")
         }
     },
-}
+};

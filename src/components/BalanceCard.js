@@ -34,7 +34,7 @@ const BalanceCard = ({ userTier = "Basic Level" }) => {
 
       try {
         // Fetch user profile
-        const response = await axios.get("${API_URL}/api/users/profile", {
+        const response = await axios.get(`${API_URL}/api/users/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -42,7 +42,7 @@ const BalanceCard = ({ userTier = "Basic Level" }) => {
         setWalletID(response.data.wallet_id); // Set wallet ID from response
 
         // Fetch coin balances
-        const balanceResponse = await fetch(`${API_URL}/api/user/balances`, {
+        const balanceResponse = await fetch(`${API_URL}/api/users/balances`, {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
         });
