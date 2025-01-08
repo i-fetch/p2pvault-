@@ -5,6 +5,7 @@ import myImage from "../assets/info-img.PNG";
 import axios from "axios";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import TawkToChat from "./Tawkto"; // Import the TawkToChat component
 
 const HomePage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -207,6 +208,9 @@ const HomePage = () => {
       <footer className="text-gray-400 text-center py-4">
         <p>&copy; 2024 P2PVault. All Rights Reserved.</p>
       </footer>
+
+      {/* Add TawkToChat component */}
+      <TawkToChat /> {/* This will load the chat widget */}
     </div>
   );
 };
