@@ -175,7 +175,7 @@ const HomePage = () => {
           {cryptoData.map((crypto) => (
             <div
               key={crypto.id}
-              className="text-center w-fit p-2 flex flex-col items-center justify-center border border-white"
+              className="text-center w-fit p-2 flex flex-col items-center justify-center border"
             >
               <img
                 src={crypto.image}
