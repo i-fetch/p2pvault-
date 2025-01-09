@@ -142,7 +142,6 @@ const HomePage = () => {
           </ul>
         </div>
       </nav>
-
       {/* Main Content */}
       <div className="flex flex-col md:flex-row items-center justify-center flex-grow px-4 py-8 space-y-8 md:space-y-0 md:space-x-8">
         <div className="flex-shrink-0">
@@ -170,7 +169,6 @@ const HomePage = () => {
           </Link>
         </div>
       </div>
-
       {/* Cryptocurrency Carousel */}
       <div className="px-4 py-8 overflow-hidden">
         <Slider {...sliderSettings}>
@@ -182,7 +180,7 @@ const HomePage = () => {
               <img
                 src={crypto.image}
                 alt={crypto.name}
-                className="w-10 h-10 mb-1 border boe"
+                className="w-10 h-10 mb-1 "
               />
               <h3 className="text-sm font-bold text-white">{crypto.name}</h3>
               <p className="text-gray-400 text-xs">
@@ -203,12 +201,10 @@ const HomePage = () => {
           ))}
         </Slider>
       </div>
-
       {/* Footer Section */}
       <footer className="text-gray-400 text-center py-4">
         <p>&copy; 2024 P2PVault. All Rights Reserved.</p>
       </footer>
-
       {/* Add TawkToChat component */}
       <TawkToChat /> {/* This will load the chat widget */}
     </div>
