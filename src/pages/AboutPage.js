@@ -9,7 +9,9 @@ const AboutPage = () => {
       {/* Header Section */}
       <header className="w-full bg-black shadow-md py-4">
         <div className="max-w-6xl mx-auto px-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-white">About P2PVault</h1>
+        <Link to="/" className="text-2xl font-bold text-white">
+            P2PVault
+          </Link>
         </div>
       </header>
 
@@ -20,7 +22,7 @@ const AboutPage = () => {
             About Us
           </h2>
           <p className="text-lg text-gray-300 leading-relaxed">
-            At <span className="text-pink-500">P2PVault</span>, we empower users to take full control of their cryptocurrency portfolios. 
+            At <Link to="/" className="text-2xl font-bold text-pink-500">P2PVault</Link>, we empower users to take full control of their cryptocurrency portfolios. 
             Our mission is to provide secure, user-friendly, and efficient solutions for managing digital assets.
           </p>
         </section>
