@@ -177,12 +177,12 @@ const HomePage = () => {
           {cryptoData.map((crypto) => (
             <div
               key={crypto.id}
-              className="text-center p-2 flex flex-col items-center"
+              className="text-center p-2 flex flex-col items-center justify-center"
             >
               <img
                 src={crypto.image}
                 alt={crypto.name}
-                className="w-10 h-10 mb-1"
+                className="w-10 h-10 mb-1 border boe"
               />
               <h3 className="text-sm font-bold text-white">{crypto.name}</h3>
               <p className="text-gray-400 text-xs">
