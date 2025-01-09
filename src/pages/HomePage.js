@@ -180,7 +180,7 @@ const HomePage = () => {
               <img
                 src={crypto.image}
                 alt={crypto.name}
-                className="w-10 h-10 mb-1 border border-white "
+                className="w-10 h-10 mx-auto mb-1"
               />
               <h3 className="text-sm font-bold text-white">{crypto.name}</h3>
               <p className="text-gray-400 text-xs">
