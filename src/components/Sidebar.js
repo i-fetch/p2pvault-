@@ -63,7 +63,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
             <h2 className="text-2xl font-bold text-gray-200">P2PVault</h2>
             <button
               onClick={() => setIsCollapsed(false)}
-              className="text-gray-800 dark:text-gray-200 text-2xl"
+              className="text-gray-200 text-2xl"
             >
               <FaSignOutAlt />
             </button>
@@ -74,7 +74,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
                 <li key={index}>
                   <NavLink
                     to={link.path}
-                    onClick={() => setIsCollapsed(false)}
+                    onClick={() => setIsCollapsed(false)} // Close the sidebar on click
                     className={({ isActive }) =>
                       `flex items-center gap-4 py-2 px-4 rounded-lg text-lg font-medium transition ${
                         isActive
