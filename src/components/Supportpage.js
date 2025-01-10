@@ -4,7 +4,7 @@ const SupportPage = () => {
   const [faqOpen, setFaqOpen] = useState(null);
   const [supportTickets, setSupportTickets] = useState([
     { id: 1, subject: "Issue with transaction", status: "Open" },
-    { id: 2, subject: "KYC verification delay", status: "Resolved" },
+    { id: 2, subject: "KYC verification delay", status: "Open" },
   ]);
 
   useEffect(() => {
@@ -34,7 +34,7 @@ const SupportPage = () => {
       <h1 className="text-2xl font-bold mb-4">Support</h1>
 
       {/* FAQ Section */}
-      <div className="mb-6">
+      <div className="mb-6 bg-black">
         <h2 className="text-xl font-semibold mb-4">Frequently Asked Questions</h2>
         <div className="space-y-4">
           {[
