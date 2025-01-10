@@ -5,6 +5,7 @@ import { TransactionProvider } from "./context/TransactionContext";
 import "react-toastify/dist/ReactToastify.css";
 import SupportPage from "./components/Supportpage";
 
+
 // Dashboard Components
 import BalanceCard from "./components/BalanceCard";
 import ActivityList from "./components/ActivityList";
@@ -21,6 +22,9 @@ import HomePage from "./pages/HomePage"; // Homepage component
 import SignupPage from "./pages/SignupPage"; // Signup component
 import LoginPage from "./pages/LoginPage"; // Login component
 import AboutPage from "./pages/AboutPage";
+import ForgotPasswordPage from "./pages/ForgotPassword";
+import ResetPasswordPage from "./pages/ResetLink";
+
 
 // Private Route Component to handle protected routes
 const PrivateRoute = ({ element }) => {
@@ -99,6 +103,8 @@ const App = () => {
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
 
           {/* User Dashboard Routes */}
           <Route

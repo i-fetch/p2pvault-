@@ -49,16 +49,12 @@ function LoginPage() {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
-            
           },
           body: JSON.stringify(formData),
         });
 
-        console.log("API response:", response); // Debugging API response
-
         if (response.ok) {
           const data = await response.json();
-          console.log("Login successful:", data); // Debugging login success
           localStorage.setItem("token", data.token);
           localStorage.setItem("user", JSON.stringify({ username: data.username, email: data.email }));
           setTimeout(() => {
@@ -67,7 +63,6 @@ function LoginPage() {
           }, 1000);
         } else {
           const errorData = await response.json();
-          console.log("Error data:", errorData); // Debugging error response
           if (response.status === 401) {
             setErrors({ form: "Invalid credentials. Please try again." });
           } else {
@@ -76,7 +71,6 @@ function LoginPage() {
           setIsLoading(false);
         }
       } catch (error) {
-        console.error("Error during login:", error);
         setErrors({ form: "An error occurred. Please try again later." });
         setIsLoading(false);
       }
@@ -156,6 +150,12 @@ function LoginPage() {
             Don't have an account?{" "}
             <Link to="/signup" className="text-pink-500 hover:underline">
               Sign Up
+            </Link>
+          </p>
+
+          <p className="mt-4 text-gray-400 text-center text-sm">
+            <Link to="/forgot-password" className="text-pink-500 hover:underline">
+              Forgot Password?
             </Link>
           </p>
         </div>
