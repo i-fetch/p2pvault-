@@ -105,7 +105,7 @@ const App = () => {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
-
+          
           {/* User Dashboard Routes */}
           <Route
             path="/profile"
