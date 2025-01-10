@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 
-const API_URL=process.env.REACT_APP_API_URL2;
 const ResetPasswordPage = () => {
-  const { token } = useParams(); // Get the token from the URL
+  const navigate = useNavigate();
+  const {token} = useParams();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
@@ -12,7 +12,6 @@ const ResetPasswordPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
       return;
@@ -27,9 +26,7 @@ const ResetPasswordPage = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch(
-        `${API_URL}/api/users/reset-password/${token}`,
-        {
+      const response = await fetch(`${API_URL}/api/users/reset-password/${token}`,{
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -39,7 +36,8 @@ const ResetPasswordPage = () => {
       );
 
       if (response.ok) {
-        setSuccess("Password reset successful. You can now log in with your new password.");
+        setSuccess("Password reset successful. Redirecting to login...");
+        setTimeout(() => navigate("/login"), 3000); // Redirect after 3 seconds
       } else {
         const data = await response.json();
         setError(data.message || "An error occurred. Please try again.");
