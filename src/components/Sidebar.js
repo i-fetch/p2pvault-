@@ -1,22 +1,21 @@
 import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { FaHome, FaUser, FaBars, FaTimes, FaSignOutAlt, FaIdCard } from "react-icons/fa"; // Added FaIdCard for KYC
+import { FaHome, FaUser, FaBars, FaTimes, FaSignOutAlt, FaIdCard, FaLifeRing } from "react-icons/fa";
 
 const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [showLogoutModal, setShowLogoutModal] = useState(false); // State to control the modal
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const navigate = useNavigate();
 
   const links = [
     { name: "Dashboard", path: "/dashboard", icon: <FaHome /> },
     { name: "Profile", path: "/profile", icon: <FaUser /> },
-    { name: "KYC", path: "/kyc", icon: <FaIdCard /> }, // Added KYC link
+    { name: "KYC", path: "/kyc", icon: <FaIdCard /> },
+    { name: "Support", path: "/support", icon: <FaLifeRing /> }, // New Support link
   ];
 
   const handleLogout = () => {
-    // Clear user session data (e.g., token, user info from localStorage/sessionStorage)
-    localStorage.removeItem("userToken"); // Replace with your token or session management
-    // Redirect to the homepage
+    localStorage.removeItem("userToken");
     navigate("/");
   };
 
@@ -24,7 +23,7 @@ const Sidebar = () => {
     <>
       {/* Sidebar for Desktop */}
       <div className={`hidden md:block w-64 bg-stone-900 shadow-lg min-h-screen p-6`}>
-        <h2 className="text-2xl font-bold text-white  mb-6">P2PVault</h2>
+        <h2 className="text-2xl font-bold text-white mb-6">P2PVault</h2>
         <nav>
           <ul className="space-y-4">
             {links.map((link, index) => (
@@ -36,7 +35,7 @@ const Sidebar = () => {
                     `flex items-center gap-4 py-2 px-4 rounded-lg text-lg font-medium transition ${
                       isActive
                         ? "bg-pink-700 text-white shadow-lg"
-                        : "text-white  hover:bg-gray-700"
+                        : "text-white hover:bg-gray-700"
                     }`
                   }
                 >
@@ -50,7 +49,7 @@ const Sidebar = () => {
 
         {/* Logout Button */}
         <button
-          onClick={() => setShowLogoutModal(true)} // Show modal on logout click
+          onClick={() => setShowLogoutModal(true)}
           className="flex items-center gap-4 py-2 px-4 rounded-lg text-lg font-medium transition text-gray-200 hover:bg-gray-700 mt-6"
         >
           <FaSignOutAlt className="text-xl" />
@@ -66,13 +65,13 @@ const Sidebar = () => {
             <p className="text-gray-400 mb-6">Are you sure you want to log out?</p>
             <div className="flex justify-end gap-4">
               <button
-                onClick={() => setShowLogoutModal(false)} // Close modal
+                onClick={() => setShowLogoutModal(false)}
                 className="py-2 px-4 rounded-lg bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-400 dark:hover:bg-gray-600"
               >
                 Cancel
               </button>
               <button
-                onClick={handleLogout} // Perform logout
+                onClick={handleLogout}
                 className="py-2 px-4 rounded-lg bg-red-700 text-white hover:bg-red-800"
               >
                 Logout
@@ -88,7 +87,7 @@ const Sidebar = () => {
           isCollapsed ? "translate-x-0" : "-translate-x-full"
         } md:hidden`}
       >
-        <div className="w-64 bg-black  min-h-screen p-6">
+        <div className="w-64 bg-black min-h-screen p-6">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-200">P2PVault</h2>
             <button
@@ -105,7 +104,7 @@ const Sidebar = () => {
                   <NavLink
                     to={link.path}
                     end={link.path === "/"}
-                    onClick={() => setIsCollapsed(false)} // Close menu on navigation
+                    onClick={() => setIsCollapsed(false)}
                     className={({ isActive }) =>
                       `flex items-center gap-4 py-2 px-4 rounded-lg text-lg font-medium transition ${
                         isActive
@@ -124,7 +123,7 @@ const Sidebar = () => {
 
           {/* Logout Button for Mobile */}
           <button
-            onClick={() => setShowLogoutModal(true)} // Show modal on logout click
+            onClick={() => setShowLogoutModal(true)}
             className="flex items-center gap-4 py-2 px-4 rounded-lg text-lg font-medium transition text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 mt-6"
           >
             <FaSignOutAlt className="text-xl" />

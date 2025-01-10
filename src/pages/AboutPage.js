@@ -18,8 +18,9 @@ const AboutPage = () => {
       {/* Main Content */}
       <main className="flex-grow px-4 py-8 max-w-6xl mx-auto">
         <section className="text-center mb-12">
-        <Link to="/" className="text-2xl font-bold text-pink-500">P2PVault</Link>
-
+          <h2 className="text-4xl font-bold mb-4 text-white">
+            About Us
+          </h2>
           <p className="text-lg text-gray-300 leading-relaxed">
             At <span className="text-pink-500">P2PVault</span>, we empower users to take full control of their cryptocurrency portfolios. 
             Our mission is to provide secure, user-friendly, and efficient solutions for managing digital assets.

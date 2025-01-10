@@ -10,9 +10,11 @@ const KYCPage = () => {
   const [backText, setBackText] = useState("");
   const [loading, setLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [kycStatus, setKycStatus] = useState(null); // To track KYC status
-  const API_URL =process.env.REACT_APP_API_URL2;
+  const [kycStatus, setKycStatus] = useState(null);
+  const [idType, setIdType] = useState(""); // ID type state
+  const API_URL = process.env.REACT_APP_API_URL2;
 
+  const idOptions = ["ID Card", "Driver's License", "Passport", "NIN"];
 
   // Fetch KYC status on page load
   useEffect(() => {
@@ -28,13 +30,13 @@ const KYCPage = () => {
         });
 
         if (response.data && response.data.status) {
-          setKycStatus(response.data.status); // Set the KYC status
+          setKycStatus(response.data.status);
         } else {
-          setKycStatus("notSubmitted"); // If no status returned, mark it as "notSubmitted"
+          setKycStatus("notSubmitted");
         }
       } catch (error) {
         console.error("Error fetching KYC status:", error);
-        setKycStatus("notSubmitted"); // If there's an error, mark it as "notSubmitted"
+        setKycStatus("notSubmitted");
       }
     };
 
@@ -42,15 +44,34 @@ const KYCPage = () => {
   }, []);
 
   // Handle image upload
-  const handleImageUpload = (e, type) => {
+  const handleImageUpload = async (e, type) => {
     const file = e.target.files[0];
     if (file) {
-      if (type === "front") {
-        setFrontImage(file);
-        processImage(file, "front");
-      } else {
-        setBackImage(file);
-        processImage(file, "back");
+      setLoading(true);
+      try {
+        // Upload to Vercel Blob
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const uploadResponse = await axios.post(`${API_URL}/api/upload`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+
+        const uploadedUrl = uploadResponse.data.url;
+
+        if (type === "front") {
+          setFrontImage(uploadedUrl);
+          processImage(file, "front");
+        } else {
+          setBackImage(uploadedUrl);
+          processImage(file, "back");
+        }
+      } catch (error) {
+        toast.error("Error uploading file. Please try again.", { position: "top-right" });
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -59,9 +80,8 @@ const KYCPage = () => {
   const processImage = (file, type) => {
     const reader = new FileReader();
     reader.onloadend = () => {
-      setLoading(true);
       Tesseract.recognize(reader.result, "eng", {
-        logger: (m) => console.log(m), // Log progress
+        logger: (m) => console.log(m),
       })
         .then(({ data: { text } }) => {
           if (type === "front") {
@@ -69,11 +89,9 @@ const KYCPage = () => {
           } else {
             setBackText(text);
           }
-          setLoading(false);
         })
         .catch(() => {
           toast.error("Error processing image. Please try again.", { position: "top-right" });
-          setLoading(false);
         });
     };
     reader.readAsDataURL(file);
@@ -81,10 +99,13 @@ const KYCPage = () => {
 
   // Handle form submission
   const handleSubmit = async () => {
-    if (!frontText || !backText) {
-      toast.error("Please upload both the front and back images of your National ID.", {
-        position: "top-right",
-      });
+    if (!idType) {
+      toast.error("Please select the type of ID you are uploading.", { position: "top-right" });
+      return;
+    }
+
+    if (!frontImage || !backImage) {
+      toast.error("Please upload both the front and back images of your ID.", { position: "top-right" });
       return;
     }
 
@@ -97,11 +118,13 @@ const KYCPage = () => {
       return;
     }
 
-    const formData = new FormData();
-    formData.append("frontImage", frontImage);
-    formData.append("backImage", backImage);
-    formData.append("frontText", frontText);
-    formData.append("backText", backText);
+    const formData = {
+      frontImage,
+      backImage,
+      idType,
+      frontText,
+      backText,
+    };
 
     try {
       const response = await axios.post(`${API_URL}/api/kyc/submit`, formData, {
@@ -133,75 +156,61 @@ const KYCPage = () => {
         Please upload the front and back images of your ID card or document for verification (Mandatory).
       </p>
 
-      {/* Check KYC Status */}
       {kycStatus === "notSubmitted" && (
         <div className="text-white mb-4">
-          <p>Your KYC has not been submitted yet.</p>
-          {/* KYC Submission Form */}
-          <div>
-            <div className="mb-4">
-              <label className="block text-white mb-2">Front of Document</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleImageUpload(e, "front")}
-                className="block w-full text-sm text-gray-500 border border-white rounded-lg cursor-pointer focus:outline-none"
-              />
-              {frontImage && (
-                <img
-                  src={URL.createObjectURL(frontImage)}
-                  alt="Front Document"
-                  className="mt-2 w-24 h-32 object-cover"
-                />
-              )}
-            </div>
-            <div className="mb-4">
-              <label className="block text-white mb-2">Back of Document</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleImageUpload(e, "back")}
-                className="block w-full text-sm text-gray-500 border border-white rounded-lg cursor-pointer focus:outline-none"
-              />
-              {backImage && (
-                <img
-                  src={URL.createObjectURL(backImage)}
-                  alt="Back Document"
-                  className="mt-2 w-24 h-32 object-cover"
-                />
-              )}
-            </div>
-            <button
-              onClick={handleSubmit}
-              disabled={loading || !frontImage || !backImage}
-              className={`w-full py-2 mt-4 rounded-lg text-white font-semibold transition ${
-                loading || !frontImage || !backImage ? "bg-gray-500 cursor-not-allowed" : "bg-pink-500 hover:bg-pink-600"
-              }`}
-            >
-              {loading ? "Submitting..." : "Submit KYC"}
-            </button>
+          <label className="block text-white mb-2">Select ID Type</label>
+          <select
+            value={idType}
+            onChange={(e) => setIdType(e.target.value)}
+            className="block w-full p-2 border border-white rounded-lg bg-stone-800 text-white"
+          >
+            <option value="">-- Select ID Type --</option>
+            {idOptions.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+
+          <div className="mb-4 mt-4">
+            <label className="block text-white mb-2">Front of Document</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => handleImageUpload(e, "front")}
+              className="block w-full text-sm text-gray-500 border border-white rounded-lg cursor-pointer focus:outline-none"
+            />
+            {frontImage && <img src={frontImage} alt="Front Document" className="mt-2 w-24 h-32 object-cover" />}
           </div>
+
+          <div className="mb-4">
+            <label className="block text-white mb-2">Back of Document</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => handleImageUpload(e, "back")}
+              className="block w-full text-sm text-gray-500 border border-white rounded-lg cursor-pointer focus:outline-none"
+            />
+            {backImage && <img src={backImage} alt="Back Document" className="mt-2 w-24 h-32 object-cover" />}
+          </div>
+
+          <button
+            onClick={handleSubmit}
+            disabled={loading || !frontImage || !backImage || !idType}
+            className={`w-full py-2 mt-4 rounded-lg text-white font-semibold transition ${
+              loading || !frontImage || !backImage || !idType
+                ? "bg-gray-500 cursor-not-allowed"
+                : "bg-pink-500 hover:bg-pink-600"
+            }`}
+          >
+            {loading ? "Submitting..." : "Submit KYC"}
+          </button>
         </div>
       )}
 
-      {/* Display KYC Status */}
-      {kycStatus === "pending" && (
-        <div className="text-white mb-4">
-          <p>Your KYC status: Pending Approval</p>
-        </div>
-      )}
-
-      {kycStatus === "approved" && (
-        <div className="text-white mb-4">
-          <p>Your KYC status: Approved</p>
-        </div>
-      )}
-
-      {kycStatus === "rejected" && (
-        <div className="text-white mb-4">
-          <p>Your KYC status: Rejected</p>
-        </div>
-      )}
+      {kycStatus === "pending" && <p className="text-white">Your KYC status: Pending Approval</p>}
+      {kycStatus === "approved" && <p className="text-white">Your KYC status: Approved</p>}
+      {kycStatus === "rejected" && <p className="text-white">Your KYC status: Rejected</p>}
     </div>
   );
 };

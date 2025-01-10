@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import { TransactionProvider } from "./context/TransactionContext";
 import "react-toastify/dist/ReactToastify.css";
+import SupportPage from "./components/Supportpage";
 
 // Dashboard Components
 import BalanceCard from "./components/BalanceCard";
@@ -127,6 +128,18 @@ const App = () => {
                 <ActivityList />
                 <CryptoCarousel className="h-48 sm:h-64 md:h-80 lg:h-96 my-4" />
               </DashboardLayout>
+            }
+          />
+          <Route
+            path="/support"
+            element={
+              <PrivateRoute
+                element={
+                  <DashboardLayout>
+                    <SupportPage />
+                  </DashboardLayout>
+                }
+              />
             }
           />
           <Route
