@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 
 const ResetPasswordPage = () => {
@@ -7,6 +7,7 @@ const ResetPasswordPage = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -16,14 +17,25 @@ const ResetPasswordPage = () => {
       return;
     }
 
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long.");
+      return;
+    }
+
+    setError("");
+    setIsLoading(true);
+
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL2}/api/users/reset-password/${token}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ password }),
-      });
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL2}/api/users/reset-password/${token}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ password }),
+        }
+      );
 
       if (response.ok) {
         setSuccess("Password reset successful. You can now log in with your new password.");
@@ -33,7 +45,9 @@ const ResetPasswordPage = () => {
       }
     } catch (error) {
       console.error("Error resetting password:", error);
-      setError("An error occurred. Please try again.");
+      setError("Unable to connect to the server. Please try again later.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -59,6 +73,9 @@ const ResetPasswordPage = () => {
                 className="w-full p-2 mt-1 bg-white text-black border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-700 text-sm"
                 required
               />
+              <small className="text-gray-500 block mt-1">
+                Password must be at least 8 characters long.
+              </small>
             </div>
             <div className="mb-3">
               <label htmlFor="confirmPassword" className="text-gray-400 text-sm">
@@ -75,9 +92,14 @@ const ResetPasswordPage = () => {
             </div>
             <button
               type="submit"
-              className="w-full py-2 bg-stone-900 text-white rounded-lg hover:bg-stone-400 focus:outline-none focus:ring-2 focus:ring-white text-sm"
+              className={`w-full py-2 rounded-lg text-sm ${
+                isLoading
+                  ? "bg-stone-500 cursor-not-allowed"
+                  : "bg-stone-900 hover:bg-stone-400"
+              } text-white focus:outline-none focus:ring-2 focus:ring-white`}
+              disabled={isLoading}
             >
-              Reset Password
+              {isLoading ? "Resetting..." : "Reset Password"}
             </button>
           </form>
         </div>
