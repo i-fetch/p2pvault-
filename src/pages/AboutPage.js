@@ -9,9 +9,7 @@ const AboutPage = () => {
       {/* Header Section */}
       <header className="w-full bg-black shadow-md py-4">
         <div className="max-w-6xl mx-auto px-4 flex justify-between items-center">
-        <Link to="/" className="text-2xl font-bold text-white">
-            P2PVault
-          </Link>
+        
         </div>
       </header>
 
