@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 
+const API_URL=process.env.REACT_APP_API_URL2;
 const ResetPasswordPage = () => {
   const { token } = useParams(); // Get the token from the URL
   const [password, setPassword] = useState("");
@@ -27,7 +28,7 @@ const ResetPasswordPage = () => {
 
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL2}/api/users/reset-password/${token}`,
+        `${API_URL}/api/users/reset-password/${token}`,
         {
           method: "POST",
           headers: {
