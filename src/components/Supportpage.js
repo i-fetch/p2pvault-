@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import TawkToChat from "./TawkToChat"; // Import the TawkToChat component
 
 const SupportPage = () => {
   const [faqOpen, setFaqOpen] = useState(null);
@@ -6,19 +7,6 @@ const SupportPage = () => {
     { id: 1, subject: "Issue with transaction", status: "Open" },
     { id: 2, subject: "KYC verification delay", status: "Open" },
   ]);
-
-  useEffect(() => {
-    // Add Tawk.to script to load the chat widget
-    const script = document.createElement("script");
-    script.src = "https://embed.tawk.to/your-tawkto-id/default";
-    script.async = true;
-    document.body.appendChild(script);
-
-    return () => {
-      // Clean up the Tawk.to script when the component unmounts
-      document.body.removeChild(script);
-    };
-  }, []);
 
   const handleFaqToggle = (index) => {
     setFaqOpen(faqOpen === index ? null : index);
@@ -89,10 +77,10 @@ const SupportPage = () => {
         </form>
       </div>
 
-      {/* Live Chat Placeholder */}
+      {/* Live Chat */}
       <div className="mb-6">
         <h2 className="text-xl font-semibold mb-4">Live Chat</h2>
-        <p className="text-gray-400">Chat with us now!</p>
+        <TawkToChat /> {/* Embed the TawkToChat component */}
       </div>
     </div>
   );
