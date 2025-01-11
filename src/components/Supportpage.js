@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import TawkToChat from "../pages/Tawkto"; // Import the TawkToChat component
+import TawkToChat from "./TawkToChat"; // Import the TawkToChat component
 
 const SupportPage = () => {
   const [faqOpen, setFaqOpen] = useState(null);
@@ -7,6 +7,19 @@ const SupportPage = () => {
     { id: 1, subject: "Issue with transaction", status: "Open" },
     { id: 2, subject: "KYC verification delay", status: "Open" },
   ]);
+
+  useEffect(() => {
+    // Add Tawk.to script to load the chat widget
+    const script = document.createElement("script");
+    script.src = 'https://embed.tawk.to/677acdfdaf5bfec1dbe7021d/1igrr9ail';;
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      // Clean up the Tawk.to script when the component unmounts
+      document.body.removeChild(script);
+    };
+  }, []);
 
   const handleFaqToggle = (index) => {
     setFaqOpen(faqOpen === index ? null : index);
@@ -25,7 +38,7 @@ const SupportPage = () => {
       <div className="mb-6 bg-stone-900">
         <h2 className="text-xl font-semibold mb-4">Frequently Asked Questions</h2>
         <div className="space-y-4">
-          {[ 
+          {[
             { question: "How do I reset my password?", answer: "Click on 'Forgot Password' on the login page." },
             { question: "How long does KYC approval take?", answer: "KYC approval typically takes 24-48 hours." },
             { question: "How can I contact support?", answer: "You can use the contact form below or email us at p2pvaults@gmail.com." },
@@ -77,11 +90,14 @@ const SupportPage = () => {
         </form>
       </div>
 
-      {/* Live Chat */}
+      {/* Live Chat Placeholder */}
       <div className="mb-6">
         <h2 className="text-xl font-semibold mb-4">Live Chat</h2>
-        <TawkToChat /> {/* Embed the TawkToChat component */}
+        <p className="text-gray-400">Live chat is coming soon. Stay tuned!</p>
       </div>
+
+      {/* Embed the TawkToChat component */}
+      <TawkToChat />
     </div>
   );
 };
