@@ -46,6 +46,13 @@ const DashboardLayout = ({ children }) => {
       <div className="flex-1 flex flex-col w-full">
         <header className="flex justify-between items-center p-4 shadow-md bg-stone-900">
           <h1 className="text-lg sm:text-xl font-bold">My Dashboard</h1>
+          {/* Toggle Button for Sidebar */}
+          <button
+            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            className="md:hidden text-white text-2xl"
+          >
+            &#9776;
+          </button>
         </header>
         <main className="flex flex-col items-center p-4 overflow-auto w-full max-w-screen-lg mx-auto">
           {children}

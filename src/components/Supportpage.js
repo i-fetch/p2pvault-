@@ -56,17 +56,10 @@ const SupportPage = () => {
               href="https://wa.me/+16315994210"
               className="text-green-500 hover:text-green-600"
             >
-              WhatsApp: +1 631 599 890
+              WhatsApp: +1 631 599 4210
             </a>
           </li>
-          <li>
-            <a
-              href="tel:+16315994210"
-              className="text-blue-500 hover:text-blue-600"
-            >
-              Phone: +1 631 599 4210
-            </a>
-          </li>
+        
         </ul>
       </div>
 

@@ -60,7 +60,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
       {/* Mobile Sidebar */}
       {isCollapsed && (
         <div
-          className="fixed inset-0 z-50 bg-black bg-opacity-50 md:hidden"
+          className="fixed inset-0 z-40 bg-black bg-opacity-50 md:hidden"
           onClick={() => setIsCollapsed(false)} // Close sidebar when clicking outside
         ></div>
       )}
