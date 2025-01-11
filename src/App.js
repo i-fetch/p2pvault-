@@ -5,7 +5,6 @@ import { TransactionProvider } from "./context/TransactionContext";
 import "react-toastify/dist/ReactToastify.css";
 import SupportPage from "./components/Supportpage";
 
-
 // Dashboard Components
 import BalanceCard from "./components/BalanceCard";
 import ActivityList from "./components/ActivityList";
@@ -25,7 +24,6 @@ import AboutPage from "./pages/AboutPage";
 import ForgotPasswordPage from "./pages/ForgotPassword";
 import ResetPasswordPage from "./pages/ResetLink";
 
-
 // Private Route Component to handle protected routes
 const PrivateRoute = ({ element }) => {
   const token = localStorage.getItem("token");
@@ -38,27 +36,8 @@ const PrivateRoute = ({ element }) => {
   return element;
 };
 
-const DashboardLayout = ({ children }) => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  return (
-    <div className="min-h-screen flex bg-black text-gray-50 transition duration-300">
-      <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-      <div className="flex-1 flex flex-col w-full">
-        <header className="flex justify-between items-center p-4 shadow-md bg-stone-900">
-          <h1 className="text-lg sm:text-xl font-bold">My Dashboard</h1>
-          
-        </header>
-
-        <main className="flex flex-col items-center p-4 overflow-auto w-full max-w-screen-lg mx-auto">
-          {children}
-        </main>
-      </div>
-    </div>
-  );
-};
-
 const App = () => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [walletAddress, setWalletAddress] = useState("0x123...456");
   const [userTier, setUserTier] = useState(1);
   const [walletBalance, setWalletBalance] = useState(500);
@@ -77,89 +56,100 @@ const App = () => {
     <TransactionProvider>
       <ToastContainer position="top-right" autoClose={3000} />
       <Router>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<HomePage />} />
-          <Route path="/signup" element={<SignupPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
-          
-          {/* User Dashboard Routes */}
-          <Route
-            path="/profile"
-            element={
-              <PrivateRoute
-                element={
-                  <DashboardLayout>
-                    <Profile />
-                  </DashboardLayout>
-                }
-              />
-            }
-          />
-          <Route
-            path="/dashboard"
-            element={
-              <DashboardLayout>
-                <div className="flex flex-col md:flex-row justify-between items-stretch w-full gap-4">
-                  <BalanceCard walletAddress={walletAddress} walletBalance={walletBalance} />
-                  <TierComponent
-                    userTier={userTier}
-                    upgradePending={upgradePending}
-                    onRequestUpgrade={handleTierUpgradeRequest}
-                  />
-                </div>
-                <ActivityList />
-                <CryptoCarousel className="h-48 sm:h-64 md:h-80 lg:h-96 my-4" />
-              </DashboardLayout>
-            }
-          />
-          <Route
-            path="/support"
-            element={
-              <PrivateRoute
-                element={
-                  <DashboardLayout>
-                    <SupportPage />
-                  </DashboardLayout>
-                }
-              />
-            }
-          />
-          <Route
-            path="/transaction/:type/:id"
-            element={
-              <DashboardLayout>
-                <TransactionForm walletAddress={walletAddress} />
-              </DashboardLayout>
-            }
-          />
-          
-          <Route
-            path="/transaction-history"
-            element={
-              <DashboardLayout>
-                <TransactionHistory />
-              </DashboardLayout>
-            }
-          />
-          
-          {/* KYC Route */}
-          <Route
-            path="/kyc"
-            element={
-              <PrivateRoute
-                element={
-                  <DashboardLayout>
-                    <KYCPage />
-                  </DashboardLayout>
-                }
-              />
-            }
-          />
-        </Routes>
+        <div className="min-h-screen flex bg-black text-gray-50 transition duration-300">
+          <Sidebar isCollapsed={isSidebarOpen} setIsCollapsed={setIsSidebarOpen} /> {/* Pass the correct props */}
+          <div className="flex-1 flex flex-col w-full">
+            <header className="flex justify-between items-center p-4 shadow-md bg-stone-900">
+              <h1 className="text-lg sm:text-xl font-bold">My Dashboard</h1>
+            </header>
+
+            <main className="flex flex-col items-center p-4 overflow-auto w-full max-w-screen-lg mx-auto">
+              <Routes>
+                {/* Public Routes */}
+                <Route path="/" element={<HomePage />} />
+                <Route path="/signup" element={<SignupPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/about" element={<AboutPage />} />
+                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
+
+                {/* User Dashboard Routes */}
+                <Route
+                  path="/profile"
+                  element={
+                    <PrivateRoute
+                      element={
+                        <>
+                          <Profile />
+                        </>
+                      }
+                    />
+                  }
+                />
+                <Route
+                  path="/dashboard"
+                  element={
+                    <>
+                      <div className="flex flex-col md:flex-row justify-between items-stretch w-full gap-4">
+                        <BalanceCard walletAddress={walletAddress} walletBalance={walletBalance} />
+                        <TierComponent
+                          userTier={userTier}
+                          upgradePending={upgradePending}
+                          onRequestUpgrade={handleTierUpgradeRequest}
+                        />
+                      </div>
+                      <ActivityList />
+                      <CryptoCarousel className="h-48 sm:h-64 md:h-80 lg:h-96 my-4" />
+                    </>
+                  }
+                />
+                <Route
+                  path="/support"
+                  element={
+                    <PrivateRoute
+                      element={
+                        <>
+                          <SupportPage />
+                        </>
+                      }
+                    />
+                  }
+                />
+                <Route
+                  path="/transaction/:type/:id"
+                  element={
+                    <>
+                      <TransactionForm walletAddress={walletAddress} />
+                    </>
+                  }
+                />
+
+                <Route
+                  path="/transaction-history"
+                  element={
+                    <>
+                      <TransactionHistory />
+                    </>
+                  }
+                />
+
+                {/* KYC Route */}
+                <Route
+                  path="/kyc"
+                  element={
+                    <PrivateRoute
+                      element={
+                        <>
+                          <KYCPage />
+                        </>
+                      }
+                    />
+                  }
+                />
+              </Routes>
+            </main>
+          </div>
+        </div>
       </Router>
     </TransactionProvider>
   );
