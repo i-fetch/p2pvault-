@@ -168,7 +168,79 @@ const KYCPage = () => {
 
   return (
     <div className="w-full max-w-md mx-auto bg-stone-900 p-6 rounded-lg shadow-lg">
-      {/* Remaining JSX code is unchanged */}
+      <h2 className="text-2xl font-semibold text-white mb-4">KYC Verification</h2>
+      
+      {kycStatus === null ? (
+        <p className="text-white">Loading KYC status...</p>
+      ) : kycStatus === "pending" ? (
+        <p className="text-yellow-400">Your KYC is pending approval.</p>
+      ) : kycStatus === "approved" ? (
+        <p className="text-green-400">Your KYC has been approved.</p>
+      ) : kycStatus === "rejected" ? (
+        <p className="text-red-400">Your KYC has been rejected. Please try again.</p>
+      ) : (
+        <p className="text-white">You have not submitted your KYC yet.</p>
+      )}
+
+      <div>
+        <label className="block text-white">ID Type</label>
+        <select
+          className="w-full p-2 mb-4 bg-stone-800 text-white rounded"
+          value={idType}
+          onChange={(e) => setIdType(e.target.value)}
+        >
+          <option value="">Select ID Type</option>
+          {idOptions.map((option, index) => (
+            <option key={index} value={option}>
+              {option}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div>
+        <label className="block text-white">Front Image</label>
+        <input
+          type="file"
+          onChange={(e) => handleImageSelect(e, "front")}
+          className="w-full p-2 mb-4 bg-stone-800 text-white rounded"
+        />
+      </div>
+
+      <div>
+        <label className="block text-white">Back Image</label>
+        <input
+          type="file"
+          onChange={(e) => handleImageSelect(e, "back")}
+          className="w-full p-2 mb-4 bg-stone-800 text-white rounded"
+        />
+      </div>
+
+      <div>
+        <label className="block text-white">Extracted Front Text</label>
+        <textarea
+          className="w-full p-2 mb-4 bg-stone-800 text-white rounded"
+          value={frontText}
+          readOnly
+        />
+      </div>
+
+      <div>
+        <label className="block text-white">Extracted Back Text</label>
+        <textarea
+          className="w-full p-2 mb-4 bg-stone-800 text-white rounded"
+          value={backText}
+          readOnly
+        />
+      </div>
+
+      <button
+        onClick={handleSubmit}
+        disabled={loading}
+        className="mt-4 w-full bg-blue-600 text-white py-2 rounded-md"
+      >
+        {loading ? "Submitting..." : "Submit KYC"}
+      </button>
     </div>
   );
 };
