@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import TawkToChat from "./TawkToChat"; // Import the TawkToChat component
+import TawkToChat from "../pages/Tawkto"; // Import the TawkToChat component
 
 const SupportPage = () => {
   const [faqOpen, setFaqOpen] = useState(null);
