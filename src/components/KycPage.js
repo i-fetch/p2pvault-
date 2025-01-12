@@ -83,7 +83,7 @@ const KYCPage = () => {
     formData.append("file", file);
 
     try {
-      const response = await axios.post("/api/upload-to-blob", formData);
+      const response = await axios.post(`${API_URL}/api/upload-to-blob`, formData);
       if (response.data && response.data.url) {
         return response.data.url;
       } else {
