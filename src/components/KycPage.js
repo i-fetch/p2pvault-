@@ -12,7 +12,6 @@ const KYCPage = () => {
   const [kycStatus, setKycStatus] = useState(null);
   const [idType, setIdType] = useState(""); // ID type state
   const API_URL = process.env.REACT_APP_API_URL2; // Backend API URL
-  const BLOB_API_URL = "https://vcfi3s637pmbt6ul.public.blob.vercel-storage.com"; // Vercel Blob API URL
 
   const idOptions = ["ID Card", "Driver's License", "Passport", "NIN"];
 
@@ -78,19 +77,14 @@ const KYCPage = () => {
     reader.readAsDataURL(file);
   };
 
-  // Upload image to Vercel Blob
+  // Upload image to Blob via serverless function
   const uploadToBlob = async (file) => {
     const formData = new FormData();
     formData.append("file", file);
 
     try {
-      const response = await axios.post(BLOB_API_URL, formData, {
-        headers: {
-          Authorization: `Bearer ${process.env.VERCEL_BLOB_API_TOKEN}`,
-        },
-      });
-
-      if (response.data.url) {
+      const response = await axios.post("/api/upload-to-blob", formData);
+      if (response.data && response.data.url) {
         return response.data.url;
       } else {
         throw new Error("Failed to upload to Blob.");
