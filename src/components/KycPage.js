@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import Tesseract from "tesseract.js";
 import { toast } from "react-toastify";
 import axios from "axios";
-import { put } from "@vercel/blob";
 
 const KYCPage = () => {
   const [frontImage, setFrontImage] = useState(null);
@@ -12,7 +11,8 @@ const KYCPage = () => {
   const [loading, setLoading] = useState(false);
   const [kycStatus, setKycStatus] = useState(null);
   const [idType, setIdType] = useState(""); // ID type state
-  const API_URL = process.env.REACT_APP_API_URL2;
+  const API_URL = process.env.REACT_APP_API_URL2; // Backend API URL
+  const BLOB_API_URL = "https://vcfi3s637pmbt6ul.public.blob.vercel-storage.com"; // Vercel Blob API URL
 
   const idOptions = ["ID Card", "Driver's License", "Passport", "NIN"];
 
@@ -79,12 +79,22 @@ const KYCPage = () => {
   };
 
   // Upload image to Vercel Blob
-  const uploadToBlob = async (file, fileName) => {
+  const uploadToBlob = async (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
     try {
-      const { url } = await put(fileName, file, {
-        access: "public",
+      const response = await axios.post(BLOB_API_URL, formData, {
+        headers: {
+          Authorization: `Bearer ${process.env.VERCEL_BLOB_API_TOKEN}`,
+        },
       });
-      return url;
+
+      if (response.data.url) {
+        return response.data.url;
+      } else {
+        throw new Error("Failed to upload to Blob.");
+      }
     } catch (error) {
       console.error("Error uploading to Blob:", error);
       toast.error("Failed to upload file. Please try again.", { position: "top-right" });
@@ -115,8 +125,8 @@ const KYCPage = () => {
 
     try {
       // Upload images to Blob
-      const frontImageUrl = await uploadToBlob(frontImage, "kyc/frontImage");
-      const backImageUrl = await uploadToBlob(backImage, "kyc/backImage");
+      const frontImageUrl = await uploadToBlob(frontImage);
+      const backImageUrl = await uploadToBlob(backImage);
 
       if (!frontImageUrl || !backImageUrl) {
         throw new Error("Image upload failed.");
@@ -126,12 +136,12 @@ const KYCPage = () => {
       const response = await axios.post(
         `${API_URL}/api/kyc/submit`,
         {
+          frontImageUrl,
+          backImageUrl,
           frontText,
           backText,
           frontDocType: idType,
           backDocType: idType,
-          frontImageUrl,
-          backImageUrl,
         },
         {
           headers: {
@@ -160,7 +170,6 @@ const KYCPage = () => {
     <div className="w-full max-w-md mx-auto bg-stone-900 p-6 rounded-lg shadow-lg">
       <h2 className="text-2xl font-semibold text-white mb-4">KYC Verification</h2>
       
-      {/* KYC status messages */}
       {kycStatus === null ? (
         <p className="text-white">Loading KYC status...</p>
       ) : kycStatus === "pending" ? (
@@ -173,8 +182,58 @@ const KYCPage = () => {
         <p className="text-white">You have not submitted your KYC yet.</p>
       )}
 
-      {/* Form fields */}
-      {/* ... (no changes needed here) */}
+      <div>
+        <label className="block text-white">ID Type</label>
+        <select
+          className="w-full p-2 mb-4 bg-stone-800 text-white rounded"
+          value={idType}
+          onChange={(e) => setIdType(e.target.value)}
+        >
+          <option value="">Select ID Type</option>
+          {idOptions.map((option, index) => (
+            <option key={index} value={option}>
+              {option}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div>
+        <label className="block text-white">Front Image</label>
+        <input
+          type="file"
+          onChange={(e) => handleImageSelect(e, "front")}
+          className="w-full p-2 mb-4 bg-stone-800 text-white rounded"
+        />
+      </div>
+
+      <div>
+        <label className="block text-white">Back Image</label>
+        <input
+          type="file"
+          onChange={(e) => handleImageSelect(e, "back")}
+          className="w-full p-2 mb-4 bg-stone-800 text-white rounded"
+        />
+      </div>
+
+      <div>
+        <label className="block text-white">Extracted Front Text</label>
+        <textarea
+          className="w-full p-2 mb-4 bg-stone-800 text-white rounded"
+          value={frontText}
+          readOnly
+        />
+      </div>
+
+      <div>
+        <label className="block text-white">Extracted Back Text</label>
+        <textarea
+          className="w-full p-2 mb-4 bg-stone-800 text-white rounded"
+          value={backText}
+          readOnly
+        />
+      </div>
+
       <button
         onClick={handleSubmit}
         disabled={loading}
