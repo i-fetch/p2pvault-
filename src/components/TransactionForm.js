@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
-import QRCode  from "qrcode.react";
-
+import { QRCodeCanvas } from "qrcode.react";
 const API_URL = process.env.REACT_APP_API_URL2;
 
 const TransactionForm = () => {
