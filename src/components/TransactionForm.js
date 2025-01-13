@@ -30,19 +30,10 @@ const walletAddresses = {
   XRP: "rKPyUkd7rPVmKY7KKbkMqhq49bYi6Tdd3h",
 };
 
-const getWalletAddress = (coin, network) => {
-  return coin?.name
-    ? walletAddresses[coin.name]?.[network] || walletAddresses[coin.name]
+const getWalletAddress = (coinName, network) => {
+  return walletAddresses[coinName]
+    ? walletAddresses[coinName][network] || walletAddresses[coinName]
     : "No Address Available";
-};
-
-const calculateGasFee = (network) => {
-  const fees = {
-    ERC20: 0.02,
-    TRC20: 0.01,
-    BSC: 0.005,
-  };
-  return fees[network] || 0.02; // Default to 0.02 if network isn't matched
 };
 
 const TransactionForm = ({ userBalances = {}, addTransaction }) => {
@@ -60,22 +51,21 @@ const TransactionForm = ({ userBalances = {}, addTransaction }) => {
   const [isCopied, setIsCopied] = useState(false);
 
   const { coin } = location.state || {}; // Retrieve coin data passed from ActivityList
+  const coinName = coin?.name;
 
   useEffect(() => {
-    if (!coin) {
+    if (!coinName) {
       setError("Invalid coin data. Please go back and select a coin.");
       return;
     }
 
-    const { name } = coin;
-    const defaultNetwork = networkOptions[name] ? networkOptions[name][0] : "Unknown";
-
+    const defaultNetwork = networkOptions[coinName]?.[0] || "Unknown";
     setNetwork(defaultNetwork);
     setReceiveNetwork(defaultNetwork);
 
-    const address = getWalletAddress(coin, defaultNetwork);
+    const address = getWalletAddress(coinName, defaultNetwork);
     setWalletAddress(address);
-  }, [coin]);
+  }, [coinName]);
 
   const handleBack = () => navigate(-1);
 
@@ -90,7 +80,7 @@ const TransactionForm = ({ userBalances = {}, addTransaction }) => {
       return;
     }
 
-    const balance = userBalances[coin?.name] || 0;
+    const balance = userBalances[coinName] || 0;
     if (parseFloat(amount) > balance) {
       setError("Insufficient balance.");
       return;
@@ -105,13 +95,13 @@ const TransactionForm = ({ userBalances = {}, addTransaction }) => {
 
     addTransaction({
       type: "Send",
-      coin: coin.name,
+      coin: coinName,
       amount: parseFloat(amount),
       address,
       network,
     });
 
-    alert(`Transaction successful: ${amount} ${coin.name} sent to ${address}`);
+    alert(`Transaction successful: ${amount} ${coinName} sent to ${address}`);
     navigate(-1);
   };
 
@@ -125,7 +115,7 @@ const TransactionForm = ({ userBalances = {}, addTransaction }) => {
   const handleReceiveNetworkChange = (e) => {
     const selectedNetwork = e.target.value;
     setReceiveNetwork(selectedNetwork);
-    const address = getWalletAddress(coin, selectedNetwork);
+    const address = getWalletAddress(coinName, selectedNetwork);
     setWalletAddress(address);
   };
 
@@ -138,7 +128,7 @@ const TransactionForm = ({ userBalances = {}, addTransaction }) => {
         Back
       </button>
       <h2 className="text-2xl font-bold mb-6 text-gray-200">
-        {coin?.name} Transaction
+        {coinName} Transaction
       </h2>
 
       {error && (
@@ -147,7 +137,7 @@ const TransactionForm = ({ userBalances = {}, addTransaction }) => {
 
       {/* SEND FORM */}
       <div>
-        <h3 className="text-xl font-semibold text-gray-300">Send {coin?.name}</h3>
+        <h3 className="text-xl font-semibold text-gray-300">Send {coinName}</h3>
         <div className="mb-4">
           <label htmlFor="amount" className="block text-gray-200">
             Amount
@@ -182,7 +172,7 @@ const TransactionForm = ({ userBalances = {}, addTransaction }) => {
             onChange={(e) => setNetwork(e.target.value)}
             className="mt-2 p-2 border rounded-lg w-full bg-stone-900 text-gray-200 border-stone-600"
           >
-            {networkOptions[coin.name]?.map((net, idx) => (
+            {networkOptions[coinName]?.map((net, idx) => (
               <option key={idx} value={net}>
                 {net}
               </option>
@@ -203,7 +193,7 @@ const TransactionForm = ({ userBalances = {}, addTransaction }) => {
           onClick={handleReceive}
           className="w-full py-2 text-white rounded-lg bg-green-800 hover:bg-green-500"
         >
-          {isReceiving ? "Hide" : "Receive"} {coin?.name}
+          {isReceiving ? "Hide" : "Receive"} {coinName}
         </button>
         {isReceiving && (
           <div className="mt-4">
@@ -217,7 +207,7 @@ const TransactionForm = ({ userBalances = {}, addTransaction }) => {
                 onChange={handleReceiveNetworkChange}
                 className="mt-2 p-2 border rounded-lg w-full bg-stone-900 text-gray-200 border-stone-600"
               >
-                {networkOptions[coin.name]?.map((net, idx) => (
+                {networkOptions[coinName]?.map((net, idx) => (
                   <option key={idx} value={net}>
                     {net}
                   </option>
