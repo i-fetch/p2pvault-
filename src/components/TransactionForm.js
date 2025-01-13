@@ -34,13 +34,16 @@ const TransactionForm = ({ userBalances = {}, addTransaction }) => {
       return;
     }
 
-    setNetwork(networkOptions[coin.name] ? networkOptions[coin.name][0] : "Unknown");
+    setNetwork(
+      networkOptions[coin.name] ? networkOptions[coin.name][0] : "Unknown"
+    );
     const address = getWalletAddress(coin, network);
     setWalletAddress(address);
   }, [coin]);
 
   const getWalletAddress = (coin, network) => {
-    if (!coin || !coin.network) return "0x8F0889b7F1Aac33999ad6e3361cE29e76BF8d470";
+    if (!coin || !coin.network)
+      return "0x8F0889b7F1Aac33999ad6e3361cE29e76BF8d470";
 
     const walletAddresses = {
       Bitcoin: "1PgFcjATXEM6jwb2MDtZtiNwuoRS4W6f2r",
@@ -59,7 +62,9 @@ const TransactionForm = ({ userBalances = {}, addTransaction }) => {
       XRP: "rKPyUkd7rPVmKY7KKbkMqhq49bYi6Tdd3h",
     };
 
-    return walletAddresses[coin.name] ? walletAddresses[coin.name][network] || walletAddresses[coin.name] : "No Address Available";
+    return walletAddresses[coin.name]
+      ? walletAddresses[coin.name][network] || walletAddresses[coin.name]
+      : "No Address Available";
   };
 
   const handleBack = () => navigate(-1);
@@ -124,12 +129,19 @@ const TransactionForm = ({ userBalances = {}, addTransaction }) => {
 
   return (
     <div className="p-6 bg-stone-900 rounded-lg shadow-lg w-full max-w-5xl mx-auto">
-      <button onClick={handleBack} className="mb-4 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
+      <button
+        onClick={handleBack}
+        className="mb-4 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+      >
         Back
       </button>
-      <h2 className="text-2xl font-bold mb-6 text-gray-200">{coin?.name} Transaction</h2>
+      <h2 className="text-2xl font-bold mb-6 text-gray-200">
+        {coin?.name} Transaction
+      </h2>
 
-      {error && <div className="mb-4 p-3 bg-red-500 text-white rounded-lg">{error}</div>}
+      {error && (
+        <div className="mb-4 p-3 bg-red-500 text-white rounded-lg">{error}</div>
+      )}
 
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
@@ -179,13 +191,19 @@ const TransactionForm = ({ userBalances = {}, addTransaction }) => {
             placeholder="Enter wallet address"
           />
           <p className="mt-2 text-sm text-red-700">
-            Please ensure that the address is valid for the selected network to avoid loss of funds.
+            Please ensure that the address is valid for the selected network to
+            avoid loss of funds.
           </p>
         </div>
         <div className="mb-4">
           <p className="text-sm text-gray-400">
             Estimated Gas Fee: <strong>{gasFee} ETH</strong>
           </p>
+          {userBalances["Ethereum"] < gasFee && (
+            <p className="text-sm text-red-500">
+              Insufficient ETH for gas fees.
+            </p>
+          )}
         </div>
         <button
           type="submit"
@@ -204,15 +222,19 @@ const TransactionForm = ({ userBalances = {}, addTransaction }) => {
         </button>
         {isReceiving && (
           <div className="mt-4 text-center">
-            <div className="text-lg text-gray-200 mb-2 flex items-center justify-center">
-              <span className="mr-2" text-sm >{walletAddress}</span>
-              <CopyToClipboard text={walletAddress} onCopy={handleCopy}>
-                <button className="px-2 py-1 bg-gray-600 text-white rounded-lg">
-                  {isCopied ? <FaClipboardCheck /> : <FaClipboard />} Copy
-                </button>
-              </CopyToClipboard>
+            <div className="text-sm md:text-base text-gray-200 mb-2 break-words w-full max-w-[90%] mx-auto">
+              {walletAddress}
             </div>
-            <QRCodeCanvas value={walletAddress} size={200} className="mx-auto" />
+            <QRCodeCanvas
+              value={walletAddress}
+              size={150}
+              className="mx-auto"
+            />
+            <CopyToClipboard text={walletAddress} onCopy={handleCopy}>
+              <button className="mt-2 px-4 py-2 bg-gray-600 text-white rounded-lg">
+                {isCopied ? <FaClipboardCheck /> : <FaClipboard />} Copy Address
+              </button>
+            </CopyToClipboard>
           </div>
         )}
       </div>
