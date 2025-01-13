@@ -12,14 +12,24 @@ const TransactionForm = () => {
   const [amount, setAmount] = useState("");
   const [recipient, setRecipient] = useState("");
   const [transactionType, setTransactionType] = useState("send");
-  const [network, setNetwork] = useState(coin.symbol); // Default to the coin's symbol (BTC, ETH, etc.)
+  const [network, setNetwork] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [showReceive, setShowReceive] = useState(false); // State for showing QR and address
 
+  // Available networks for each coin
+  const coinNetworks = {
+    BTC: ["Bitcoin", "Lightning Network"],
+    ETH: ["Ethereum (ERC-20)", "Binance Smart Chain (BEP-20)", "Polygon (MATIC)"],
+    XRP: ["XRP Ledger"],
+    SOL: ["Solana"],
+    USDT: ["Ethereum (ERC-20)", "Tron (TRC-20)", "Binance Smart Chain (BEP-20)", "Solana", "Avalanche"],
+    TON: ["TON Blockchain"],
+  };
+
   useEffect(() => {
-    // Reset network selection to the coin's symbol on coin change
-    setNetwork(coin.symbol);
+    // Set the default network based on the selected coin
+    setNetwork(coin.symbol); // Default to the coin's symbol (BTC, ETH, etc.)
   }, [coin]);
 
   const handleAmountChange = (e) => {
@@ -46,6 +56,12 @@ const TransactionForm = () => {
 
     if (!amount || parseFloat(amount) <= 0) {
       setError("Please enter a valid amount.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!network) {
+      setError("Please select a network.");
       setIsSubmitting(false);
       return;
     }
@@ -153,12 +169,11 @@ const TransactionForm = () => {
             onChange={handleNetworkChange}
             className="mt-2 p-2 w-full bg-gray-800 text-white rounded"
           >
-            <option value="BTC">Bitcoin (BTC)</option>
-            <option value="ETH">Ethereum (ETH)</option>
-            <option value="XRP">Ripple (XRP)</option>
-            <option value="SOL">Solana (SOL)</option>
-            <option value="USDT">Tether (USDT)</option>
-            <option value="TON">TON (TON)</option>
+            {coinNetworks[coin.symbol].map((net, index) => (
+              <option key={index} value={net}>
+                {net}
+              </option>
+            ))}
           </select>
         </div>
 
