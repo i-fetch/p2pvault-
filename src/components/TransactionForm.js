@@ -205,7 +205,7 @@ const TransactionForm = ({ userBalances = {}, addTransaction }) => {
         {isReceiving && (
           <div className="mt-4 text-center">
             <div className="text-lg text-gray-200 mb-2 flex items-center justify-center">
-              <span className="mr-2">{walletAddress}</span>
+              <span className="mr-2" text-sm >{walletAddress}</span>
               <CopyToClipboard text={walletAddress} onCopy={handleCopy}>
                 <button className="px-2 py-1 bg-gray-600 text-white rounded-lg">
                   {isCopied ? <FaClipboardCheck /> : <FaClipboard />} Copy
