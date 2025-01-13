@@ -4,6 +4,47 @@ import { QRCodeCanvas } from "qrcode.react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { FaClipboard, FaClipboardCheck } from "react-icons/fa";
 
+const networkOptions = {
+  Bitcoin: ["Bitcoin", "Bitcoin Cash"],
+  Ethereum: ["ERC20", "BSC", "Polygon"],
+  Solana: ["Solana"],
+  TON: ["TON"],
+  Usdt: ["ERC20", "TRC20", "BEP20"],
+  XRP: ["XRP"],
+};
+
+const walletAddresses = {
+  Bitcoin: "1PgFcjATXEM6jwb2MDtZtiNwuoRS4W6f2r",
+  Ethereum: {
+    ERC20: "0x8F0889b7F1Aac33999ad6e3361cE29e76BF8d470",
+    BSC: "0xB4fA0a9C0fB3463E9028d8a01D77548b9D3271B0",
+    Polygon: "0x7a19d123fa6f05A16f56CBB66c01D39A4Caf987A",
+  },
+  Solana: "FkYpX3f625MaaRmYVNF5AWtX3jXXP9iB9Y5AqeUYFFft",
+  TON: "EQBIvhjeezdpYekgPEEa4qWF_XdmzBIyIgqwI4yvp5wTxLX0",
+  Usdt: {
+    ERC20: "0x8F0889b7F1Aac33999ad6e3361cE29e76BF8d470",
+    TRC20: "TzYjscHJkMG6BYbmYrEmyApKzcdjoHR7d9",
+    BEP20: "0xB9b04DcbB64d7B10dB18F44231A1E26392c8c9b5",
+  },
+  XRP: "rKPyUkd7rPVmKY7KKbkMqhq49bYi6Tdd3h",
+};
+
+const getWalletAddress = (coin, network) => {
+  return coin?.name
+    ? walletAddresses[coin.name]?.[network] || walletAddresses[coin.name]
+    : "No Address Available";
+};
+
+const calculateGasFee = (network) => {
+  const fees = {
+    ERC20: 0.02,
+    TRC20: 0.01,
+    BSC: 0.005,
+  };
+  return fees[network] || 0.02; // Default to 0.02 if network isn't matched
+};
+
 const TransactionForm = ({ userBalances = {}, addTransaction }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -20,54 +61,21 @@ const TransactionForm = ({ userBalances = {}, addTransaction }) => {
 
   const { coin } = location.state || {}; // Retrieve coin data passed from ActivityList
 
-  const networkOptions = {
-    Bitcoin: ["Bitcoin", "Bitcoin Cash"],
-    Ethereum: ["ERC20", "BSC", "Polygon"],
-    Solana: ["Solana"],
-    TON: ["TON"],
-    Usdt: ["ERC20", "TRC20", "BEP20"],
-    XRP: ["XRP"],
-  };
-
   useEffect(() => {
     if (!coin) {
       setError("Invalid coin data. Please go back and select a coin.");
       return;
     }
 
-    setNetwork(
-      networkOptions[coin.name] ? networkOptions[coin.name][0] : "Unknown"
-    );
-    setReceiveNetwork(
-      networkOptions[coin.name] ? networkOptions[coin.name][0] : "Unknown"
-    );
+    const { name } = coin;
+    const defaultNetwork = networkOptions[name] ? networkOptions[name][0] : "Unknown";
 
-    const address = getWalletAddress(coin, network);
+    setNetwork(defaultNetwork);
+    setReceiveNetwork(defaultNetwork);
+
+    const address = getWalletAddress(coin, defaultNetwork);
     setWalletAddress(address);
   }, [coin]);
-
-  const getWalletAddress = (coin, network) => {
-    const walletAddresses = {
-      Bitcoin: "1PgFcjATXEM6jwb2MDtZtiNwuoRS4W6f2r",
-      Ethereum: {
-        ERC20: "0x8F0889b7F1Aac33999ad6e3361cE29e76BF8d470",
-        BSC: "0xB4fA0a9C0fB3463E9028d8a01D77548b9D3271B0",
-        Polygon: "0x7a19d123fa6f05A16f56CBB66c01D39A4Caf987A",
-      },
-      Solana: "FkYpX3f625MaaRmYVNF5AWtX3jXXP9iB9Y5AqeUYFFft",
-      TON: "EQBIvhjeezdpYekgPEEa4qWF_XdmzBIyIgqwI4yvp5wTxLX0",
-      Usdt: {
-        ERC20: "0x8F0889b7F1Aac33999ad6e3361cE29e76BF8d470",
-        TRC20: "TzYjscHJkMG6BYbmYrEmyApKzcdjoHR7d9",
-        BEP20: "0xB9b04DcbB64d7B10dB18F44231A1E26392c8c9b5",
-      },
-      XRP: "rKPyUkd7rPVmKY7KKbkMqhq49bYi6Tdd3h",
-    };
-
-    return walletAddresses[coin.name]
-      ? walletAddresses[coin.name][network] || walletAddresses[coin.name]
-      : "No Address Available";
-  };
 
   const handleBack = () => navigate(-1);
 
