@@ -1,208 +1,222 @@
 import React, { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
+import { useNavigate, useLocation } from "react-router-dom";
 import { QRCodeCanvas } from "qrcode.react";
-const API_URL = process.env.REACT_APP_API_URL2;
+import { CopyToClipboard } from "react-copy-to-clipboard";
+import { FaClipboard, FaClipboardCheck } from "react-icons/fa";
 
-const TransactionForm = () => {
-  const location = useLocation();
+const TransactionForm = ({ userBalances = {}, addTransaction }) => {
   const navigate = useNavigate();
-  const { coin } = location.state; // Receive coin data passed from ActivityList
-  const [amount, setAmount] = useState("");
-  const [recipient, setRecipient] = useState("");
-  const [transactionType, setTransactionType] = useState("send");
-  const [network, setNetwork] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState(null);
-  const [showReceive, setShowReceive] = useState(false); // State for showing QR and address
+  const location = useLocation();
 
-  // Available networks for each coin
-  const coinNetworks = {
-    BTC: ["Bitcoin", "Lightning Network"],
-    ETH: ["Ethereum (ERC-20)", "Binance Smart Chain (BEP-20)", "Polygon (MATIC)"],
-    XRP: ["XRP Ledger"],
-    SOL: ["Solana"],
-    USDT: ["Ethereum (ERC-20)", "Tron (TRC-20)", "Binance Smart Chain (BEP-20)", "Solana", "Avalanche"],
-    TON: ["TON Blockchain"],
+  const [amount, setAmount] = useState("");
+  const [address, setAddress] = useState("");
+  const [network, setNetwork] = useState(""); 
+  const [gasFee, setGasFee] = useState(0.02); // Fixed gas fee for all networks
+  const [error, setError] = useState("");
+  const [isReceiving, setIsReceiving] = useState(false);
+  const [walletAddress, setWalletAddress] = useState("");
+  const [isCopied, setIsCopied] = useState(false);
+
+  const { coin } = location.state || {}; // Retrieve coin data passed from ActivityList
+
+  const networkOptions = {
+    Bitcoin: ["Bitcoin", "Bitcoin Cash"],
+    Ethereum: ["ERC20", "BSC", "Polygon"],
+    Solana: ["Solana"],
+    TON: ["TON"],
+    Usdt: ["ERC20", "TRC20", "BEP20"],
+    XRP: ["XRP"],
   };
 
   useEffect(() => {
-    // Set the default network based on the selected coin
-    setNetwork(coin.symbol); // Default to the coin's symbol (BTC, ETH, etc.)
+    if (!coin) {
+      setError("Invalid coin data. Please go back and select a coin.");
+      return;
+    }
+
+    setNetwork(networkOptions[coin.name] ? networkOptions[coin.name][0] : "Unknown");
+    const address = getWalletAddress(coin, network);
+    setWalletAddress(address);
   }, [coin]);
 
-  const handleAmountChange = (e) => {
-    setAmount(e.target.value);
+  const getWalletAddress = (coin, network) => {
+    if (!coin || !coin.network) return "0x8F0889b7F1Aac33999ad6e3361cE29e76BF8d470"; 
+
+    const walletAddresses = {
+      Bitcoin: "1PgFcjATXEM6jwb2MDtZtiNwuoRS4W6f2r",
+      Ethereum: {
+        ERC20: "0x8F0889b7F1Aac33999ad6e3361cE29e76BF8d470",
+        BSC: "0xB4fA0a9C0fB3463E9028d8a01D77548b9D3271B0",
+        Polygon: "0x7a19d123fa6f05A16f56CBB66c01D39A4Caf987A",
+      },
+      Solana: "FkYpX3f625MaaRmYVNF5AWtX3jXXP9iB9Y5AqeUYFFft",
+      TON: "EQBIvhjeezdpYekgPEEa4qWF_XdmzBIyIgqwI4yvp5wTxLX0",
+      Usdt: {
+        ERC20: "0x8F0889b7F1Aac33999ad6e3361cE29e76BF8d470",
+        TRC20: "TzYjscHJkMG6BYbmYrEmyApKzcdjoHR7d9",
+        BEP20: "0xB9b04DcbB64d7B10dB18F44231A1E26392c8c9b5",
+      },
+      XRP: "rKPyUkd7rPVmKY7KKbkMqhq49bYi6Tdd3h",
+    };
+
+    return walletAddresses[coin.name] ? walletAddresses[coin.name][network] || walletAddresses[coin.name] : "No Address Available";
   };
 
-  const handleRecipientChange = (e) => {
-    setRecipient(e.target.value);
-  };
+  const handleBack = () => navigate(-1);
 
-  const handleTransactionTypeChange = (e) => {
-    setTransactionType(e.target.value);
-    setShowReceive(e.target.value === "receive"); // Show QR and address if "receive" is selected
-  };
-
-  const handleNetworkChange = (e) => {
-    setNetwork(e.target.value);
-  };
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    setError(null);
 
-    if (!amount || parseFloat(amount) <= 0) {
-      setError("Please enter a valid amount.");
-      setIsSubmitting(false);
+    if (!coin) {
+      setError("Invalid coin data. Cannot submit transaction.");
       return;
     }
 
-    if (!network) {
-      setError("Please select a network.");
-      setIsSubmitting(false);
+    const balance = userBalances[coin.id] || 0;
+    const totalCost = parseFloat(amount) + gasFee;
+
+    if (!amount || !address) {
+      setError("Please fill in all fields.");
       return;
     }
 
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setError("No token found. Please log in again.");
-        navigate("/login");
-        return;
-      }
-
-      // Transaction request payload
-      const payload = {
-        coinId: coin.id,
-        amount,
-        recipient: transactionType === "send" ? recipient : null, // Only send recipient if it's a send transaction
-        type: transactionType,
-        network, // Add the selected network here
-      };
-
-      // API call to submit transaction
-      const response = await axios.post(`${API_URL}/api/transactions`, payload, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.data.success) {
-        navigate(`/dashboard`);
-      } else {
-        setError(response.data.message || "Transaction failed.");
-      }
-    } catch (error) {
-      console.error("Error submitting transaction:", error);
-      setError("Failed to process transaction. Please try again.");
-    } finally {
-      setIsSubmitting(false);
+    if (parseFloat(amount) <= 0) {
+      setError("Amount should be greater than 0.");
+      return;
     }
+
+    if (balance < totalCost) {
+      setError("Insufficient funds for this transaction.");
+      return;
+    }
+
+    const isSuccess = Math.random() > 0.2;
+
+    const transaction = {
+      coin: coin.name,
+      amount: parseFloat(amount),
+      recipient: address,
+      network,
+      gasFee,
+      timestamp: new Date().toISOString(),
+      status: isSuccess ? "Success" : "Failed",
+    };
+
+    addTransaction(transaction); 
+
+    navigate("/transaction-history");
   };
 
-  const formatNumber = (value) => {
-    return parseFloat(value).toFixed(2);
+  const handleReceive = () => setIsReceiving(!isReceiving);
+
+  const handleCopy = () => {
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
   };
+
+  if (!coin) {
+    return (
+      <div className="p-4 bg-red-500 text-white text-center">
+        Error: Coin data is missing. Please go back and try again.
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-stone-900 p-6 rounded-lg shadow-lg mt-10 w-full max-w-5xl mx-auto">
-      <h3 className="text-xl font-bold mb-4 text-white">Transaction for {coin.name}</h3>
+    <div className="p-6 bg-stone-900 rounded-lg shadow-lg w-full max-w-5xl mx-auto">
+      <button onClick={handleBack} className="mb-4 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
+        Back
+      </button>
+      <h2 className="text-2xl font-bold mb-6 text-gray-200">{coin?.name} Transaction</h2>
+
+      {error && <div className="mb-4 p-3 bg-red-500 text-white rounded-lg">{error}</div>}
+
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
-          <label htmlFor="transactionType" className="block text-white">
-            Transaction Type
+          <label htmlFor="network" className="block text-gray-200">
+            Network
           </label>
           <select
-            id="transactionType"
-            value={transactionType}
-            onChange={handleTransactionTypeChange}
-            className="mt-2 p-2 w-full bg-gray-800 text-white rounded"
+            id="network"
+            value={network}
+            onChange={(e) => {
+              setNetwork(e.target.value);
+              const address = getWalletAddress(coin, e.target.value);
+              setWalletAddress(address);
+            }}
+            className="mt-2 p-2 border rounded-lg w-full bg-stone-900 text-gray-200 border-stone-600"
           >
-            <option value="send">Send</option>
-            <option value="receive">Receive</option>
+            {networkOptions[coin.name]?.map((net, idx) => (
+              <option key={idx} value={net}>
+                {net}
+              </option>
+            ))}
           </select>
         </div>
-
-        {transactionType === "send" && (
-          <>
-            <div className="mb-4">
-              <label htmlFor="recipient" className="block text-white">
-                Recipient Address
-              </label>
-              <input
-                type="text"
-                id="recipient"
-                value={recipient}
-                onChange={handleRecipientChange}
-                className="mt-2 p-2 w-full bg-gray-800 text-white rounded"
-                placeholder="Enter recipient address"
-              />
-            </div>
-          </>
-        )}
-
         <div className="mb-4">
-          <label htmlFor="amount" className="block text-white">
+          <label htmlFor="amount" className="block text-gray-200">
             Amount
           </label>
           <input
             type="number"
             id="amount"
             value={amount}
-            onChange={handleAmountChange}
-            className="mt-2 p-2 w-full bg-gray-800 text-white rounded"
+            onChange={(e) => setAmount(e.target.value)}
+            className="mt-2 p-2 border rounded-lg w-full bg-stone-900 text-gray-200 border-gray-300 dark:border-gray-600"
             placeholder="Enter amount"
           />
         </div>
-
-        {/* Network selection */}
         <div className="mb-4">
-          <label htmlFor="network" className="block text-white">
-            Network
+          <label htmlFor="address" className="block text-gray-200">
+            Recipient Address
           </label>
-          <select
-            id="network"
-            value={network}
-            onChange={handleNetworkChange}
-            className="mt-2 p-2 w-full bg-gray-800 text-white rounded"
-          >
-            {coinNetworks[coin.symbol].map((net, index) => (
-              <option key={index} value={net}>
-                {net}
-              </option>
-            ))}
-          </select>
+          <input
+            type="text"
+            id="address"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            className="mt-2 p-2 border rounded-lg w-full bg-stone-900 text-gray-200 border-gray-300 dark:border-gray-600"
+            placeholder="Enter wallet address"
+          />
+          <p className="mt-2 text-sm text-red-700">
+            Please ensure that the address is valid for the selected network to avoid loss of funds.
+          </p>
         </div>
+        <div className="mb-4">
+          <p className="text-sm text-gray-400">
+            Estimated Gas Fee:{" "}
+            <strong>
+              {gasFee} ETH
+            </strong>
+          </p>
+        </div>
+        <button
+          type="submit"
+          className="w-full py-2  text-white rounded-lg bg-blue-700 hover:bg-blue-600"
+        >
+          Complete Transaction
+        </button>
+      </form>
 
-        {showReceive && (
-          <div className="mt-6 text-center">
-            <p className="text-white mb-4">Scan to Receive {coin.name}</p>
-            <div className="bg-gray-800 p-4 rounded-lg">
-              <QRCode value={`${network.toLowerCase()}:${coin.address}`} size={128} />
-              <p className="text-white mt-4">{coin.address}</p>
-              <button
-                onClick={() => navigator.clipboard.writeText(coin.address)}
-                className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-              >
-                Copy Address
+      <div className="mt-6">
+        <button
+          onClick={handleReceive}
+          className="w-full py-2  text-white rounded-lg bg-green-800 hover:bg-green-500"
+        >
+          {isReceiving ? "Hide" : "Receive"} {coin?.name}
+        </button>
+        {isReceiving && (
+          <div className="mt-4 text-center">
+            <QRCodeCanvas value={walletAddress} size={256} />
+            <div className="mt-2 text-lg text-gray-200">{walletAddress}</div>
+            <CopyToClipboard text={walletAddress} onCopy={handleCopy}>
+              <button className="mt-2 px-4 py-2 bg-gray-600 text-white rounded-lg">
+                {isCopied ? <FaClipboardCheck /> : <FaClipboard />} Copy Address
               </button>
-            </div>
+            </CopyToClipboard>
           </div>
         )}
-
-        <div className="mt-6">
-          {error && <p className="text-red-400 text-center">{error}</p>}
-          <button
-            type="submit"
-            className="w-full py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Submitting..." : "Submit Transaction"}
-          </button>
-        </div>
-      </form>
+      </div>
     </div>
   );
 };
