@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import QRCode from "qrcode.react"; // Make sure to install this package
@@ -12,9 +12,15 @@ const TransactionForm = () => {
   const [amount, setAmount] = useState("");
   const [recipient, setRecipient] = useState("");
   const [transactionType, setTransactionType] = useState("send");
+  const [network, setNetwork] = useState(coin.symbol); // Default to the coin's symbol (BTC, ETH, etc.)
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [showReceive, setShowReceive] = useState(false); // State for showing QR and address
+
+  useEffect(() => {
+    // Reset network selection to the coin's symbol on coin change
+    setNetwork(coin.symbol);
+  }, [coin]);
 
   const handleAmountChange = (e) => {
     setAmount(e.target.value);
@@ -27,6 +33,10 @@ const TransactionForm = () => {
   const handleTransactionTypeChange = (e) => {
     setTransactionType(e.target.value);
     setShowReceive(e.target.value === "receive"); // Show QR and address if "receive" is selected
+  };
+
+  const handleNetworkChange = (e) => {
+    setNetwork(e.target.value);
   };
 
   const handleSubmit = async (e) => {
@@ -54,6 +64,7 @@ const TransactionForm = () => {
         amount,
         recipient: transactionType === "send" ? recipient : null, // Only send recipient if it's a send transaction
         type: transactionType,
+        network, // Add the selected network here
       };
 
       // API call to submit transaction
@@ -131,11 +142,31 @@ const TransactionForm = () => {
           />
         </div>
 
+        {/* Network selection */}
+        <div className="mb-4">
+          <label htmlFor="network" className="block text-white">
+            Network
+          </label>
+          <select
+            id="network"
+            value={network}
+            onChange={handleNetworkChange}
+            className="mt-2 p-2 w-full bg-gray-800 text-white rounded"
+          >
+            <option value="BTC">Bitcoin (BTC)</option>
+            <option value="ETH">Ethereum (ETH)</option>
+            <option value="XRP">Ripple (XRP)</option>
+            <option value="SOL">Solana (SOL)</option>
+            <option value="USDT">Tether (USDT)</option>
+            <option value="TON">TON (TON)</option>
+          </select>
+        </div>
+
         {showReceive && (
           <div className="mt-6 text-center">
             <p className="text-white mb-4">Scan to Receive {coin.name}</p>
             <div className="bg-gray-800 p-4 rounded-lg">
-              <QRCode value={`bitcoin:${coin.address}`} size={128} />
+              <QRCode value={`${network.toLowerCase()}:${coin.address}`} size={128} />
               <p className="text-white mt-4">{coin.address}</p>
               <button
                 onClick={() => navigator.clipboard.writeText(coin.address)}
