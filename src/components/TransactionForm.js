@@ -10,7 +10,7 @@ const TransactionForm = ({ userBalances = {}, addTransaction }) => {
 
   const [amount, setAmount] = useState("");
   const [address, setAddress] = useState("");
-  const [network, setNetwork] = useState(""); 
+  const [network, setNetwork] = useState("");
   const [gasFee, setGasFee] = useState(0.02); // Fixed gas fee for all networks
   const [error, setError] = useState("");
   const [isReceiving, setIsReceiving] = useState(false);
@@ -40,7 +40,7 @@ const TransactionForm = ({ userBalances = {}, addTransaction }) => {
   }, [coin]);
 
   const getWalletAddress = (coin, network) => {
-    if (!coin || !coin.network) return "0x8F0889b7F1Aac33999ad6e3361cE29e76BF8d470"; 
+    if (!coin || !coin.network) return "0x8F0889b7F1Aac33999ad6e3361cE29e76BF8d470";
 
     const walletAddresses = {
       Bitcoin: "1PgFcjATXEM6jwb2MDtZtiNwuoRS4W6f2r",
@@ -102,7 +102,7 @@ const TransactionForm = ({ userBalances = {}, addTransaction }) => {
       status: isSuccess ? "Success" : "Failed",
     };
 
-    addTransaction(transaction); 
+    addTransaction(transaction);
 
     navigate("/transaction-history");
   };
@@ -184,15 +184,12 @@ const TransactionForm = ({ userBalances = {}, addTransaction }) => {
         </div>
         <div className="mb-4">
           <p className="text-sm text-gray-400">
-            Estimated Gas Fee:{" "}
-            <strong>
-              {gasFee} ETH
-            </strong>
+            Estimated Gas Fee: <strong>{gasFee} ETH</strong>
           </p>
         </div>
         <button
           type="submit"
-          className="w-full py-2  text-white rounded-lg bg-blue-700 hover:bg-blue-600"
+          className="w-full py-2 text-white rounded-lg bg-blue-700 hover:bg-blue-600"
         >
           Complete Transaction
         </button>
@@ -201,19 +198,21 @@ const TransactionForm = ({ userBalances = {}, addTransaction }) => {
       <div className="mt-6">
         <button
           onClick={handleReceive}
-          className="w-full py-2  text-white rounded-lg bg-green-800 hover:bg-green-500"
+          className="w-full py-2 text-white rounded-lg bg-green-800 hover:bg-green-500"
         >
           {isReceiving ? "Hide" : "Receive"} {coin?.name}
         </button>
         {isReceiving && (
           <div className="mt-4 text-center">
-            <QRCodeCanvas value={walletAddress} size={256} />
-            <div className="mt-2 text-lg text-gray-200">{walletAddress}</div>
-            <CopyToClipboard text={walletAddress} onCopy={handleCopy}>
-              <button className="mt-2 px-4 py-2 bg-gray-600 text-white rounded-lg">
-                {isCopied ? <FaClipboardCheck /> : <FaClipboard />} Copy Address
-              </button>
-            </CopyToClipboard>
+            <div className="text-lg text-gray-200 mb-2 flex items-center justify-center">
+              <span className="mr-2">{walletAddress}</span>
+              <CopyToClipboard text={walletAddress} onCopy={handleCopy}>
+                <button className="px-2 py-1 bg-gray-600 text-white rounded-lg">
+                  {isCopied ? <FaClipboardCheck /> : <FaClipboard />} Copy
+                </button>
+              </CopyToClipboard>
+            </div>
+            <QRCodeCanvas value={walletAddress} size={200} className="mx-auto" />
           </div>
         )}
       </div>
