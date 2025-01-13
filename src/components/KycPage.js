@@ -27,7 +27,6 @@ const KYCPage = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-
         if (response.data && response.data.status) {
           setKycStatus(response.data.status);
         } else {

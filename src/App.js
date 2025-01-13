@@ -15,6 +15,7 @@ import TierComponent from "./components/TierComponent";
 import Profile from "./components/Profile";
 import KYCPage from "./components/KycPage";
 import SupportPage from "./components/Supportpage";
+import MarqueeNotice from "./components/MarqueeNotice"; // Import MarqueeNotice
 
 // Pages
 import HomePage from "./pages/HomePage";
@@ -81,6 +82,8 @@ const App = () => {
     <TransactionProvider>
       <ToastContainer position="top-right" autoClose={3000} />
       <Router>
+        {/* Add the MarqueeNotice here */}
+        <MarqueeNotice />
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<HomePage />} />
