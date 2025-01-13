@@ -28,43 +28,45 @@ const TransactionForm = ({ userBalances = {}, addTransaction }) => {
     XRP: ["XRP"],
   };
 
+  const walletAddresses = {
+    Bitcoin: "1PgFcjATXEM6jwb2MDtZtiNwuoRS4W6f2r",
+    Ethereum: {
+      ERC20: "0x8F0889b7F1Aac33999ad6e3361cE29e76BF8d470",
+      BSC: "0xB4fA0a9C0fB3463E9028d8a01D77548b9D3271B0",
+      Polygon: "0x7a19d123fa6f05A16f56CBB66c01D39A4Caf987A",
+    },
+    Solana: "FkYpX3f625MaaRmYVNF5AWtX3jXXP9iB9Y5AqeUYFFft",
+    TON: "EQBIvhjeezdpYekgPEEa4qWF_XdmzBIyIgqwI4yvp5wTxLX0",
+    Usdt: {
+      ERC20: "0x8F0889b7F1Aac33999ad6e3361cE29e76BF8d470",
+      TRC20: "TzYjscHJkMG6BYbmYrEmyApKzcdjoHR7d9",
+      BEP20: "0xB9b04DcbB64d7B10dB18F44231A1E26392c8c9b5",
+    },
+    XRP: "rKPyUkd7rPVmKY7KKbkMqhq49bYi6Tdd3h",
+  };
+
   useEffect(() => {
     if (!coin) {
       setError("Invalid coin data. Please go back and select a coin.");
       return;
     }
 
-    setNetwork(
-      networkOptions[coin.name] ? networkOptions[coin.name][0] : "Unknown"
-    );
-    const address = getWalletAddress(coin, network);
-    setWalletAddress(address);
+    const defaultNetwork =
+      networkOptions[coin.name]?.[0] || "Unknown";
+    setNetwork(defaultNetwork);
+    updateWalletAddress(defaultNetwork);
   }, [coin]);
 
-  const getWalletAddress = (coin, network) => {
-    if (!coin || !coin.network)
-      return "0x8F0889b7F1Aac33999ad6e3361cE29e76BF8d470";
-
-    const walletAddresses = {
-      Bitcoin: "1PgFcjATXEM6jwb2MDtZtiNwuoRS4W6f2r",
-      Ethereum: {
-        ERC20: "0x8F0889b7F1Aac33999ad6e3361cE29e76BF8d470",
-        BSC: "0xB4fA0a9C0fB3463E9028d8a01D77548b9D3271B0",
-        Polygon: "0x7a19d123fa6f05A16f56CBB66c01D39A4Caf987A",
-      },
-      Solana: "FkYpX3f625MaaRmYVNF5AWtX3jXXP9iB9Y5AqeUYFFft",
-      TON: "EQBIvhjeezdpYekgPEEa4qWF_XdmzBIyIgqwI4yvp5wTxLX0",
-      Usdt: {
-        ERC20: "0x8F0889b7F1Aac33999ad6e3361cE29e76BF8d470",
-        TRC20: "TzYjscHJkMG6BYbmYrEmyApKzcdjoHR7d9",
-        BEP20: "0xB9b04DcbB64d7B10dB18F44231A1E26392c8c9b5",
-      },
-      XRP: "rKPyUkd7rPVmKY7KKbkMqhq49bYi6Tdd3h",
-    };
-
-    return walletAddresses[coin.name]
-      ? walletAddresses[coin.name][network] || walletAddresses[coin.name]
-      : "No Address Available";
+  const updateWalletAddress = (selectedNetwork) => {
+    if (walletAddresses[coin.name]) {
+      const address =
+        typeof walletAddresses[coin.name] === "object"
+          ? walletAddresses[coin.name][selectedNetwork] || "No Address Available"
+          : walletAddresses[coin.name];
+      setWalletAddress(address);
+    } else {
+      setWalletAddress("No Address Available");
+    }
   };
 
   const handleBack = () => navigate(-1);
@@ -119,14 +121,6 @@ const TransactionForm = ({ userBalances = {}, addTransaction }) => {
     setTimeout(() => setIsCopied(false), 2000);
   };
 
-  if (!coin) {
-    return (
-      <div className="p-4 bg-red-500 text-white text-center">
-        Error: Coin data is missing. Please go back and try again.
-      </div>
-    );
-  }
-
   return (
     <div className="p-6 bg-stone-900 rounded-lg shadow-lg w-full max-w-5xl mx-auto">
       <button
@@ -152,9 +146,9 @@ const TransactionForm = ({ userBalances = {}, addTransaction }) => {
             id="network"
             value={network}
             onChange={(e) => {
-              setNetwork(e.target.value);
-              const address = getWalletAddress(coin, e.target.value);
-              setWalletAddress(address);
+              const selectedNetwork = e.target.value;
+              setNetwork(selectedNetwork);
+              updateWalletAddress(selectedNetwork);
             }}
             className="mt-2 p-2 border rounded-lg w-full bg-stone-900 text-gray-200 border-stone-600"
           >
@@ -165,79 +159,22 @@ const TransactionForm = ({ userBalances = {}, addTransaction }) => {
             ))}
           </select>
         </div>
-        <div className="mb-4">
-          <label htmlFor="amount" className="block text-gray-200">
-            Amount
-          </label>
-          <input
-            type="number"
-            id="amount"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            className="mt-2 p-2 border rounded-lg w-full bg-stone-900 text-gray-200 border-gray-300 dark:border-gray-600"
-            placeholder="Enter amount"
-          />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="address" className="block text-gray-200">
-            Recipient Address
-          </label>
-          <input
-            type="text"
-            id="address"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            className="mt-2 p-2 border rounded-lg w-full bg-stone-900 text-gray-200 border-gray-300 dark:border-gray-600"
-            placeholder="Enter wallet address"
-          />
-          <p className="mt-2 text-sm text-red-700">
-            Please ensure that the address is valid for the selected network to
-            avoid loss of funds.
-          </p>
-        </div>
-        <div className="mb-4">
-          <p className="text-sm text-gray-400">
-            Estimated Gas Fee: <strong>{gasFee} ETH</strong>
-          </p>
-          {userBalances["Ethereum"] < gasFee && (
-            <p className="text-sm text-red-500">
-              Insufficient ETH for gas fees.
-            </p>
-          )}
-        </div>
-        <button
-          type="submit"
-          className="w-full py-2 text-white rounded-lg bg-blue-700 hover:bg-blue-600"
-        >
-          Complete Transaction
-        </button>
+        {/* Additional form fields */}
       </form>
 
-      <div className="mt-6">
-        <button
-          onClick={handleReceive}
-          className="w-full py-2 text-white rounded-lg bg-green-800 hover:bg-green-500"
-        >
-          {isReceiving ? "Hide" : "Receive"} {coin?.name}
-        </button>
-        {isReceiving && (
-          <div className="mt-4 text-center">
-            <div className="text-sm md:text-base text-gray-200 mb-2 break-words w-full max-w-[90%] mx-auto">
-              {walletAddress}
-            </div>
-            <QRCodeCanvas
-              value={walletAddress}
-              size={150}
-              className="mx-auto"
-            />
+      {isReceiving && (
+        <div className="mt-6">
+          <div className="text-center">
+            <QRCodeCanvas value={walletAddress} size={150} />
+            <p className="mt-2 text-sm text-gray-400">{walletAddress}</p>
             <CopyToClipboard text={walletAddress} onCopy={handleCopy}>
               <button className="mt-2 px-4 py-2 bg-gray-600 text-white rounded-lg">
                 {isCopied ? <FaClipboardCheck /> : <FaClipboard />} Copy Address
               </button>
             </CopyToClipboard>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
