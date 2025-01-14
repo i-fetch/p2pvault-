@@ -44,7 +44,7 @@ const ActivityList = () => {
 
         const coinIds = defaultCoins.map((coin) => coin.id).join(",");
         const marketResponse = await fetch(
-          `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${coinIds}&order=market_cap_desc&sparkline=false`
+          `${API_URL}/api/coingecko/price`
         );
 
         if (!marketResponse.ok) {
