@@ -1,8 +1,26 @@
-import React from "react";
-import { useTransactions } from "../context/TransactionContext"; // Adjust the path accordingly
+import React, { useEffect, useState } from "react";
+import axios from "axios"; // or any other method to make HTTP requests
 
 const TransactionHistory = () => {
-  const { transactions } = useTransactions(); // Access transactions from context
+  const [transactions, setTransactions] = useState([]);
+  const { user } = useAuth(); // Access the logged-in user details from context
+
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const response = await axios.get("/api/user/transactions", {
+          headers: {
+            Authorization: `Bearer ${user.token}`, // Include token in the header
+          },
+        });
+        setTransactions(response.data.transactions);
+      } catch (error) {
+        console.error("Error fetching transactions:", error);
+      }
+    };
+
+    fetchTransactions();
+  }, [user.token]); // Refetch when user token changes
 
   if (!transactions) {
     return (
@@ -13,9 +31,9 @@ const TransactionHistory = () => {
   }
 
   return (
-    <div className="p-6  bg-stone-900 rounded-lg shadow-lg w-full max-w-5xl mx-auto">
+    <div className="p-6 bg-stone-900 rounded-lg shadow-lg w-full max-w-5xl mx-auto">
       <h2 className="text-2xl font-bold text-gray-200 mb-6">
-        Transaction History
+        Your Transaction History
       </h2>
       <div>
         {transactions.length === 0 ? (
