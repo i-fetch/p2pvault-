@@ -214,8 +214,8 @@ const TransactionForm = ({ userBalances = {}, addTransaction }) => {
                 ))}
               </select>
             </div>
-            <div className="text-sm md:text-base text-gray-200 mb-2 break-words w-full max-w-[90%] mx-auto flex items-center justify-between">
-              <span>{walletAddress}</span>
+            <div className="text-sm md:text-base text-gray-200 mb-2 break-words w-full max-w-full mx-auto flex items-center justify-between">
+              <span className="truncate" title={walletAddress}>{walletAddress}</span>
               <CopyToClipboard text={walletAddress} onCopy={handleCopy}>
                 <button className="ml-2 px-2 py-1 bg-gray-600 text-white rounded-lg">
                   {isCopied ? <FaClipboardCheck /> : <FaClipboard />}
