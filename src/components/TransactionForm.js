@@ -6,7 +6,7 @@ import { FaClipboard, FaClipboardCheck } from "react-icons/fa";
 
 const networkOptions = {
   Bitcoin: ["Bitcoin", "Bitcoin Cash"],
-  Ethereum: ["ERC20", "BSC", "Polygon"],
+  Ethereum: ["ERC20", "BSC"],
   Solana: ["Solana"],
   TON: ["TON"],
   Usdt: ["ERC20", "TRC20", "BEP20"],
@@ -16,15 +16,15 @@ const networkOptions = {
 const walletAddresses = {
   Bitcoin: "1PgFcjATXEM6jwb2MDtZtiNwuoRS4W6f2r",
   Ethereum: {
-    ERC20: "0x8F0889b7F1Aac33999ad6e3361cE29e76BF8d470",
-    BSC: "0xB4fA0a9C0fB3463E9028d8a01D77548b9D3271B0",
-    Polygon: "0x7a19d123fa6f05A16f56CBB66c01D39A4Caf987A",
+    ERC20: "0x120995dac6a97050adb4f1c496200ec92d162beb",
+    BSC: "0x120995dac6a97050adb4f1c496200ec92d162beb",
+    
   },
   Solana: "FkYpX3f625MaaRmYVNF5AWtX3jXXP9iB9Y5AqeUYFFft",
   TON: "EQBIvhjeezdpYekgPEEa4qWF_XdmzBIyIgqwI4yvp5wTxLX0",
-  Usdt: {
-    ERC20: "0x8F0889b7F1Aac33999ad6e3361cE29e76BF8d470",
-    TRC20: "TzYjscHJkMG6BYbmYrEmyApKzcdjoHR7d9",
+  USDT: {
+    ERC20: "0x120995dac6a97050adb4f1c496200ec92d162beb",
+    TRC20: "TB2w4BhFrKtS4a7eWZGfCzkggmtc9FfSxY",
     BEP20: "0xB9b04DcbB64d7B10dB18F44231A1E26392c8c9b5",
   },
   XRP: "rKPyUkd7rPVmKY7KKbkMqhq49bYi6Tdd3h",
