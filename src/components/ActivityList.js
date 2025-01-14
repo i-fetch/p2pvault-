@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import $ from "jquery";  // Importing jQuery
 
 const API_URL = process.env.REACT_APP_API_URL2;
 
@@ -20,58 +20,62 @@ const ActivityList = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchBalancesAndMarketData = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          setError("No token found. Please log in again.");
-          navigate("/login");
-          return;
-        }
-
-        const balanceResponse = await axios.get(`${API_URL}/api/users/balances`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const balanceData = balanceResponse.data;
-        if (!balanceData.success) {
-          throw new Error(balanceData.message || "Failed to fetch user balances.");
-        }
-
-        const userBalances = balanceData.balances;
-
-        const coinIds = defaultCoins.map((coin) => coin.id).join(",");
-        const marketResponse = await fetch(
-          `${API_URL}/api/coingecko/price`
-        );
-
-        if (!marketResponse.ok) {
-          const marketErrorText = await marketResponse.text();
-          console.error("Error response from CoinGecko:", marketErrorText);
-          throw new Error("Failed to fetch market data.");
-        }
-
-        const marketData = await marketResponse.json();
-
-        const updatedCoins = defaultCoins.map((coin) => {
-          const marketInfo = marketData.find((data) => data.id === coin.id);
-          return {
-            ...coin,
-            current_price: marketInfo?.current_price || 0.0,
-            price_change_percentage_24h: marketInfo?.price_change_percentage_24h || 0.0,
-            balance: userBalances?.[coin.id] || 0.0,
-          };
-        });
-
-        setCoins(updatedCoins);
-      } catch (error) {
-        console.error("Error fetching data:", error.message);
-        setError("Failed to load data. Please try again.");
-      } finally {
-        setIsLoading(false);
+    const fetchBalancesAndMarketData = () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("No token found. Please log in again.");
+        navigate("/login");
+        return;
       }
+
+      // Fetch user balances
+      $.ajax({
+        url: `${API_URL}/api/users/balances`,
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        success: (balanceData) => {
+          if (!balanceData.success) {
+            setError("Failed to fetch user balances.");
+            setIsLoading(false);
+            return;
+          }
+
+          const userBalances = balanceData.balances;
+
+          // Fetch market data from CoinGecko
+          const coinIds = defaultCoins.map((coin) => coin.id).join(",");
+          $.ajax({
+            url: `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${coinIds}&order=market_cap_desc&sparkline=false`,
+            method: "GET",
+            success: (marketData) => {
+              const updatedCoins = defaultCoins.map((coin) => {
+                const marketInfo = marketData.find((data) => data.id === coin.id);
+                return {
+                  ...coin,
+                  current_price: marketInfo?.current_price || 0.0,
+                  price_change_percentage_24h: marketInfo?.price_change_percentage_24h || 0.0,
+                  balance: userBalances?.[coin.id] || 0.0,
+                };
+              });
+
+              setCoins(updatedCoins);
+              setIsLoading(false);
+            },
+            error: (error) => {
+              console.error("Error fetching market data:", error);
+              setError("Failed to fetch market data.");
+              setIsLoading(false);
+            },
+          });
+        },
+        error: (error) => {
+          console.error("Error fetching user balances:", error);
+          setError("Failed to load user balances.");
+          setIsLoading(false);
+        },
+      });
     };
 
     fetchBalancesAndMarketData();
@@ -149,9 +153,7 @@ const ActivityList = () => {
                   <p className="text-sm text-gray-400">Balance: {formatNumber(coin.balance || 0)}</p>
                   <p className="text-sm text-gray-400">Market Price: ${formatNumber(coin.current_price || 0)}</p>
                   <p
-                    className={`text-sm ${
-                      coin.price_change_percentage_24h >= 0 ? "text-green-400" : "text-red-400"
-                    }`}
+                    className={`text-sm ${coin.price_change_percentage_24h >= 0 ? "text-green-400" : "text-red-400"}`}
                   >
                     24h Change: {formatNumber(coin.price_change_percentage_24h || 0)}%
                   </p>
