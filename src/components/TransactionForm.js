@@ -9,7 +9,7 @@ const networkOptions = {
   Ethereum: ["ERC20", "BSC"],
   Solana: ["Solana"],
   TON: ["TON"],
-  Usdt: ["ERC20", "TRC20", "BEP20"],
+  USDT: ["ERC20", "TRC20", "BEP20"],
   XRP: ["XRP"],
 };
 
