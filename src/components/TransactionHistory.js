@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios"; // or any other method to make HTTP requests
+import { useAuth } from "../context/AuthContext"; // Adjust if using context
 
 const TransactionHistory = () => {
   const [transactions, setTransactions] = useState([]);
@@ -22,7 +23,7 @@ const TransactionHistory = () => {
     fetchTransactions();
   }, [user.token]); // Refetch when user token changes
 
-  if (!transactions) {
+  if (!transactions.length) {
     return (
       <div className="p-6 bg-white dark:bg-zinc-900 rounded-lg shadow-lg w-full max-w-5xl mx-auto">
         <p className="text-gray-800 dark:text-gray-200">Loading transactions...</p>
