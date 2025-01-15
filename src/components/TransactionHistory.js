@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+const API_URL= process.env.REACT_APP_API_URL2
 
 const TransactionHistory = () => {
   const [transactions, setTransactions] = useState([]);
@@ -8,7 +9,7 @@ const TransactionHistory = () => {
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
-        const response = await axios.get("/api/user/transactions", {
+        const response = await axios.get(`${API_URL}/api/user/transactions`, {
           headers: {
             Authorization: `Bearer ${token}`, // Use the token in the header
           },
