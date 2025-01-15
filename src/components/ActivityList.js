@@ -1,85 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import $ from "jquery";  // Importing jQuery
-
-const API_URL = process.env.REACT_APP_API_URL2;
-
-const defaultCoins = [
-  { id: "bitcoin", name: "Bitcoin", symbol: "BTC", image: "https://cryptologos.cc/logos/bitcoin-btc-logo.png", balance: 0.0 },
-  { id: "ethereum", name: "Ethereum", symbol: "ETH", image: "https://cryptologos.cc/logos/ethereum-eth-logo.png", balance: 0.0 },
-  { id: "tether", name: "Tether", symbol: "USDT", image: "https://cryptologos.cc/logos/tether-usdt-logo.png", balance: 0.0 },
-  { id: "solana", name: "Solana", symbol: "SOL", image: "https://cryptologos.cc/logos/solana-sol-logo.png", balance: 0.0 },
-  { id: "toncoin", name: "TON", symbol: "TON", image: "https://cryptologos.cc/logos/toncoin-ton-logo.png", balance: 0.0 },
-  { id: "ripple", name: "Ripple", symbol: "XRP", image: "https://cryptologos.cc/logos/xrp-xrp-logo.png", balance: 0.0 },
-];
+import { CoinDataContext } from "../context/coindatacontext";
 
 const ActivityList = () => {
-  const [coins, setCoins] = useState(defaultCoins);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { coins, isLoading, error, fetchBalancesAndMarketData } = useContext(CoinDataContext);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchBalancesAndMarketData = () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setError("No token found. Please log in again.");
-        navigate("/login");
-        return;
-      }
-
-      // Fetch user balances
-      $.ajax({
-        url: `${API_URL}/api/users/balances`,
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        success: (balanceData) => {
-          if (!balanceData.success) {
-            setError("Failed to fetch user balances.");
-            setIsLoading(false);
-            return;
-          }
-
-          const userBalances = balanceData.balances;
-
-          // Fetch market data from CoinGecko
-          const coinIds = defaultCoins.map((coin) => coin.id).join(",");
-          $.ajax({
-            url: `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${coinIds}&order=market_cap_desc&sparkline=false`,
-            method: "GET",
-            success: (marketData) => {
-              const updatedCoins = defaultCoins.map((coin) => {
-                const marketInfo = marketData.find((data) => data.id === coin.id);
-                return {
-                  ...coin,
-                  current_price: marketInfo?.current_price || 0.0,
-                  price_change_percentage_24h: marketInfo?.price_change_percentage_24h || 0.0,
-                  balance: userBalances?.[coin.id] || 0.0,
-                };
-              });
-
-              setCoins(updatedCoins);
-              setIsLoading(false);
-            },
-            error: (error) => {
-              console.error("Error fetching market data:", error);
-              setError("Failed to fetch market data.");
-              setIsLoading(false);
-            },
-          });
-        },
-        error: (error) => {
-          console.error("Error fetching user balances:", error);
-          setError("Failed to load user balances.");
-          setIsLoading(false);
-        },
-      });
-    };
-
     fetchBalancesAndMarketData();
-  }, [navigate]);
+  }, [fetchBalancesAndMarketData]);
 
   const formatNumber = (value) => {
     const number = parseFloat(value);
@@ -95,7 +24,7 @@ const ActivityList = () => {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
-        {defaultCoins.map((coin, index) => (
+        {coins.map((coin, index) => (
           <div
             key={index}
             className="p-4 bg-gray-800 rounded-lg shadow-md animate-pulse"
