@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+const API_URL =process.env.REACT_APP_API_URL2;
 
-const API_URL = process.env.REACT_APP_API_URL2;
-const CMC_API_KEY = process.env.REACT_APP_CMC_API_KEY;
 
 const defaultCoins = [
-  { id: "1", name: "Bitcoin", symbol: "BTC", image: "https://cryptologos.cc/logos/bitcoin-btc-logo.png", balance: 0.0 },
-  { id: "1027", name: "Ethereum", symbol: "ETH", image: "https://cryptologos.cc/logos/ethereum-eth-logo.png", balance: 0.0 },
-  { id: "825", name: "Tether", symbol: "USDT", image: "https://cryptologos.cc/logos/tether-usdt-logo.png", balance: 0.0 },
-  { id: "5426", name: "Solana", symbol: "SOL", image: "https://cryptologos.cc/logos/solana-sol-logo.png", balance: 0.0 },
-  { id: "11419", name: "TON", symbol: "TON", image: "https://cryptologos.cc/logos/toncoin-ton-logo.png", balance: 0.0 },
-  { id: "52", name: "Ripple", symbol: "XRP", image: "https://cryptologos.cc/logos/xrp-xrp-logo.png", balance: 0.0 },
+  { id: "bitcoin", name: "Bitcoin", symbol: "BTC", image: "https://cryptologos.cc/logos/bitcoin-btc-logo.png", balance: 0.0 },
+  { id: "ethereum", name: "Ethereum", symbol: "ETH", image: "https://cryptologos.cc/logos/ethereum-eth-logo.png", balance: 0.0 },
+  { id: "tether", name: "Tether", symbol: "USDT", image: "https://cryptologos.cc/logos/tether-usdt-logo.png", balance: 0.0 },
+  { id: "solana", name: "Solana", symbol: "SOL", image: "https://cryptologos.cc/logos/solana-sol-logo.png", balance: 0.0 },
+  { id: "toncoin", name: "TON", symbol: "TON", image: "https://cryptologos.cc/logos/toncoin-ton-logo.png", balance: 0.0 },
+  { id: "ripple", name: "Ripple", symbol: "XRP", image: "https://cryptologos.cc/logos/xrp-xrp-logo.png", balance: 0.0 },
 ];
 
 const ActivityList = () => {
@@ -37,34 +36,35 @@ const ActivityList = () => {
           },
         });
 
-        const balanceData = balanceResponse.data;
+        const balanceData = balanceResponse.data; // Axios automatically parses JSON
         if (!balanceData.success) {
           throw new Error(balanceData.message || "Failed to fetch user balances.");
         }
 
         const userBalances = balanceData.balances;
 
-        // Fetch market data from CoinMarketCap
+        // Fetch market data
         const coinIds = defaultCoins.map((coin) => coin.id).join(",");
-        const marketResponse = await axios.get(
-          `https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?id=${coinIds}`,
-          {
-            headers: {
-              "X-CMC_PRO_API_KEY": CMC_API_KEY,
-            },
-          }
+        const marketResponse = await fetch(
+          `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${coinIds}&order=market_cap_desc&sparkline=false`
         );
 
-        const marketData = marketResponse.data.data;
+        if (!marketResponse.ok) {
+          const marketErrorText = await marketResponse.text();
+          console.error("Error response from CoinGecko:", marketErrorText);
+          throw new Error("Failed to fetch market data.");
+        }
+
+        const marketData = await marketResponse.json();
 
         // Merge user balances with market data
         const updatedCoins = defaultCoins.map((coin) => {
-          const marketInfo = marketData[coin.id];
+          const marketInfo = marketData.find((data) => data.id === coin.id);
           return {
             ...coin,
-            current_price: marketInfo?.quote?.USD?.price || 0.0,
-            price_change_percentage_24h: marketInfo?.quote?.USD?.percent_change_24h || 0.0,
-            balance: userBalances?.[coin.symbol] || 0.0,
+            current_price: marketInfo?.current_price || 0.0,
+            price_change_percentage_24h: marketInfo?.price_change_percentage_24h || 0.0,
+            balance: userBalances?.[coin.id] || 0.0,
           };
         });
 
@@ -87,7 +87,7 @@ const ActivityList = () => {
 
   const handleCoinClick = (coin) => {
     navigate(`/transaction/:type/${coin.id}`, {
-      state: { coin },
+      state: { coin }, // Pass the full coin data to the TransactionForm component
     });
   };
 
@@ -133,7 +133,7 @@ const ActivityList = () => {
             role="button"
             tabIndex="0"
             aria-label={`View details for ${coin.name}`}
-            onClick={() => handleCoinClick(coin)}
+            onClick={() => handleCoinClick(coin)} // Pass the full coin object
           >
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center space-x-3">
@@ -143,20 +143,12 @@ const ActivityList = () => {
                   className="w-8 h-8 rounded-full"
                 />
                 <div>
-                  <p className="text-lg font-semibold text-white">
-                    {coin.name} ({coin.symbol.toUpperCase()})
-                  </p>
-                  <p className="text-sm text-gray-400">
-                    Balance: {formatNumber(coin.balance || 0)}
-                  </p>
-                  <p className="text-sm text-gray-400">
-                    Market Price: ${formatNumber(coin.current_price || 0)}
-                  </p>
+                  <p className="text-lg font-semibold text-white">{coin.name} ({coin.symbol.toUpperCase()})</p>
+                  <p className="text-sm text-gray-400">Balance: {formatNumber(coin.balance || 0)}</p>
+                  <p className="text-sm text-gray-400">Market Price: ${formatNumber(coin.current_price || 0)}</p>
                   <p
                     className={`text-sm ${
-                      coin.price_change_percentage_24h >= 0
-                        ? "text-green-400"
-                        : "text-red-400"
+                      coin.price_change_percentage_24h >= 0 ? "text-green-400" : "text-red-400"
                     }`}
                   >
                     24h Change: {formatNumber(coin.price_change_percentage_24h || 0)}%
