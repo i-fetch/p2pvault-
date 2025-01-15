@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useState } from "react";
-import { CoinDataContext} from '../context/coindatacontext';
+import { CoinDataProvider} from '../context/coindatacontext';
 
 const BalanceCard = () => {
-  const { coins, isLoading, error, fetchBalancesAndMarketData } = useContext(CoinDataContext);
+  const { coins, isLoading, error, fetchBalancesAndMarketData } = useContext(CoinDataProvider);
   const [totalBalance, setTotalBalance] = useState(0);
 
   useEffect(() => {
