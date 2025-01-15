@@ -1,9 +1,9 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { coindatacontext } from "../context/coindatacontext";
+import { CoinDataContext } from '../context/CoinDataContext';
 
 const ActivityList = () => {
-  const { coins, isLoading, error, fetchBalancesAndMarketData } = useContext(coincatacontext);
+  const { coins, isLoading, error, fetchBalancesAndMarketData } = useContext(CoinDataContext);
   const navigate = useNavigate();
 
   useEffect(() => {
