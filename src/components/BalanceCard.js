@@ -1,97 +1,146 @@
-import React, { useContext, useEffect, useState } from "react";
-import { CoinDataProvider} from '../context/coindatacontext';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import PropTypes from "prop-types";
 
-const BalanceCard = () => {
-  const { coins, isLoading, error, fetchBalancesAndMarketData } = useContext(CoinDataProvider);
+const BalanceCard = ({ userTier = "Basic Level" }) => {
+  const [coins, setCoins] = useState([]);
   const [totalBalance, setTotalBalance] = useState(0);
+  const [username, setUsername] = useState("");
+  const [walletID, setWalletID] = useState(""); // State for wallet ID
+  const navigate = useNavigate();
+  const API_URL =process.env.REACT_APP_API_URL2;
 
+
+  // Define the default coin data
+  const coinsData = [
+    { id: "bitcoin", name: "Bitcoin", symbol: "BTC", image: "https://cryptologos.cc/logos/bitcoin-btc-logo.png" },
+    { id: "ethereum", name: "Ethereum", symbol: "ETH", image: "https://cryptologos.cc/logos/ethereum-eth-logo.png" },
+    { id: "tether", name: "Tether", symbol: "USDT", image: "https://cryptologos.cc/logos/tether-usdt-logo.png" },
+    { id: "solana", name: "Solana", symbol: "SOL", image: "https://cryptologos.cc/logos/solana-sol-logo.png" },
+    { id: "toncoin", name: "TON", symbol: "TON", image: "https://cryptologos.cc/logos/toncoin-ton-logo.png" },
+    { id: "ripple", name: "Ripple", symbol: "XRP", image: "https://cryptologos.cc/logos/xrp-xrp-logo.png" },
+  ];
+
+  // Fetch user profile and coin data on component mount
   useEffect(() => {
-    fetchBalancesAndMarketData();
-  }, [fetchBalancesAndMarketData]);
+    const fetchData = async () => {
+      const token = localStorage.getItem("token");
 
+      if (!token) {
+        navigate("/login");
+        return;
+      }
+
+      try {
+        // Fetch user profile
+        const response = await axios.get(`${API_URL}/api/users/profile`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        setUsername(response.data.username);
+        setWalletID(response.data.wallet_id); // Set wallet ID from response
+
+        // Fetch coin balances
+        const balanceResponse = await fetch(`${API_URL}/api/users/balances`, {
+          method: "GET",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!balanceResponse.ok) {
+          throw new Error("Failed to fetch user balances.");
+        }
+
+        const balanceData = await balanceResponse.json();
+        const userBalances = balanceData.balances;
+
+        // Update coins data with user balances
+        let updatedCoins = coinsData.map((coin) => {
+          return {
+            ...coin,
+            balance: userBalances?.[coin.id] || 0.0,
+          };
+        });
+
+        // Fetch current prices for each coin (using CoinGecko API or any other API)
+        const pricePromises = updatedCoins.map(async (coin) => {
+          try {
+            const priceResponse = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${coin.id}&vs_currencies=usd`);
+            const currentPrice = priceResponse.data[coin.id]?.usd || 0;
+            return { ...coin, current_price: currentPrice };
+          } catch (error) {
+            console.error("Error fetching coin price:", error);
+            return { ...coin, current_price: 0 }; // Fallback if price fetch fails
+          }
+        });
+
+        const coinsWithPrices = await Promise.all(pricePromises);
+        setCoins(coinsWithPrices);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        navigate("/login");
+      }
+    };
+
+    fetchData();
+  }, [navigate]);
+
+  // Calculate total balance based on coins data
   useEffect(() => {
     const calculateTotalBalance = () => {
-      const total = coins.reduce((sum, coin) => {
-        return sum + (coin.balance || 0) * (coin.current_price || 0);
+      const total = coins.reduce((acc, coin) => {
+        const coinValue = (coin.balance || 0) * (coin.current_price || 0);
+        return acc + coinValue;
       }, 0);
       setTotalBalance(total);
     };
 
-    if (!isLoading && coins.length > 0) {
+    if (coins.length > 0) {
       calculateTotalBalance();
     }
-  }, [coins, isLoading]);
+  }, [coins]);
 
-  const formatNumber = (value) => {
-    const number = parseFloat(value);
-    return isNaN(number) ? "0.00" : number.toFixed(2);
+  const handleTransactionHistoryClick = () => {
+    navigate("/transaction-history", { state: { coins } });
   };
 
-  if (isLoading) {
-    return (
-      <div className="p-6 bg-gray-800 rounded-lg shadow-md animate-pulse">
-        <div className="h-6 w-32 bg-gray-600 rounded mb-4"></div>
-        <div className="h-8 w-48 bg-gray-600 rounded"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center py-10">
-        <p className="text-lg font-semibold text-red-400">
-          {error.includes("token") ? "Authentication error. Please log in again." : error}
-        </p>
-        <button
-          onClick={() => window.location.reload()}
-          className="mt-4 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
-        >
-          Retry
-        </button>
-      </div>
-    );
-  }
-
   return (
-    <div className="p-6 bg-stone-900 rounded-lg shadow-lg">
-      <h3 className="text-xl font-bold text-white mb-4">Total Balance</h3>
-      <p className="text-3xl font-semibold text-green-400 mb-6">
-        ${formatNumber(totalBalance)}
-      </p>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
-        {coins.map((coin) => (
-          <div
-            key={coin.id}
-            className="p-4 bg-black rounded-lg shadow-md"
-          >
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center space-x-3">
-                <img
-                  src={coin.image}
-                  alt={`${coin.name} logo`}
-                  className="w-8 h-8 rounded-full"
-                />
-                <div>
-                  <p className="text-lg font-semibold text-white">
-                    {coin.name} ({coin.symbol.toUpperCase()})
-                  </p>
-                  <p className="text-sm text-gray-400">
-                    Balance: {formatNumber(coin.balance || 0)}
-                  </p>
-                  <p className="text-sm text-gray-400">
-                    Market Price: ${formatNumber(coin.current_price || 0)}
-                  </p>
-                </div>
-              </div>
-              <p className="text-lg font-bold text-white">
-                ${formatNumber((coin.balance || 0) * (coin.current_price || 0))}
-              </p>
-            </div>
+    <div className="flex justify-center items-center w-full py-6 px-3">
+      <div className="bg-gradient-to-r from-stone-900 via-black-900 to-pink-700 text-white p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-[90%] sm:max-w-sm md:max-w-md lg:max-w-4xl mx-auto">
+        <h3 className="text-lg sm:text-xl font-bold mb-2">Hello, {username || "User"}!</h3>
+        <h3 className="text-lg sm:text-xl font-bold mb-2">Total Balance</h3>
+        <p className="text-2xl sm:text-3xl font-bold mb-4">${totalBalance.toFixed(2)}</p>
+
+        {walletID ? (
+          <div className="mb-3">
+            <p className="text-sm font-semibold">Wallet ID:</p>
+            <p className="text-xs text-gray-200 break-all">{walletID}</p>
           </div>
-        ))}
+        ) : (
+          <div className="mb-3 text-gray-200 text-xs">Wallet ID not available.</div>
+        )}
+
+        <div className="mb-3">
+          <span className="cursor-pointer text-sm font-semibold text-gray-200 hover:text-gray-100">
+            {userTier}
+          </span>
+        </div>
+
+        <div className="flex flex-wrap justify-center gap-2 mt-4">
+          <button
+            onClick={handleTransactionHistoryClick}
+            className="bg-black hover:bg-gray-900 text-white px-3 py-2 rounded-lg w-full sm:w-auto text-xs"
+          >
+            View Transaction History
+          </button>
+        </div>
       </div>
     </div>
   );
+};
+
+BalanceCard.propTypes = {
+  userTier: PropTypes.oneOf(["Basic Level", "Elite Level"]),
 };
 
 export default BalanceCard;
