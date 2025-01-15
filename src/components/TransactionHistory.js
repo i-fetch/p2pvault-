@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-const API_URL= process.env.REACT_APP_API_URL2
+const API_URL = process.env.REACT_APP_API_URL2;
 
 const TransactionHistory = () => {
   const [transactions, setTransactions] = useState([]);
@@ -34,36 +34,36 @@ const TransactionHistory = () => {
   }
 
   return (
-  <div className="p-6 bg-stone-900 rounded-lg shadow-lg w-full max-w-5xl mx-auto">
-    <h2 className="text-2xl font-bold text-gray-200 mb-6">
-      Your Transaction History
-    </h2>
-    <div>
-      {transactions.length === 0 ? (
-        <p>No transactions yet.</p>
-      ) : (
-        <ul>
-          {transactions.map((transaction, index) => (
-            <li
-              key={index}
-              className={`mb-4 p-4 rounded-lg ${
-                transaction.transaction_type === "deposit"
-                  ? "bg-green-700"  
-                  : "bg-red-700"   
-              }`}
-            >
-              <p><strong>Coin:</strong> {transaction.coin}</p>
-              <p><strong>Amount:</strong> {transaction.amount} {transaction.coin}</p>
-              <p><strong>Recipient:</strong> {transaction.recipient}</p>
-              <p><strong>Status:</strong> {transaction.status}</p>
-              <p><strong>Timestamp:</strong> {new Date(transaction.timestamp).toLocaleString()}</p>
-            </li>
-          ))}
-        </ul>
-      )}
+    <div className="p-6 bg-stone-900 rounded-lg shadow-lg w-full max-w-5xl mx-auto">
+      <h2 className="text-2xl font-bold text-gray-200 mb-6">
+        Your Transaction History
+      </h2>
+      <div>
+        {transactions.length === 0 ? (
+          <p>No transactions yet.</p>
+        ) : (
+          <ul>
+            {transactions.map((transaction, index) => (
+              <li
+                key={index}
+                className={`mb-4 p-4 rounded-lg ${
+                  transaction.transaction_type === "deposit"
+                    ? "bg-green-700"
+                    : "bg-red-700"
+                }`}
+              >
+                <p><strong>Coin:</strong> {transaction.coin}</p>
+                <p><strong>Amount:</strong> {transaction.amount} {transaction.coin}</p>
+                <p><strong>Recipient:</strong> {transaction.recipient}</p>
+                <p><strong>Status:</strong> {transaction.status}</p>
+                <p><strong>Timestamp:</strong> {new Date(transaction.timestamp).toLocaleString()}</p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
-  </div>
-);
-
+  );
+};
 
 export default TransactionHistory;
