@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-const API_URL =process.env.REACT_APP_API_URL2;
+import $ from "jquery";  // Importing jQuery
 
+const API_URL = process.env.REACT_APP_API_URL2;
 
 const defaultCoins = [
   { id: "bitcoin", name: "Bitcoin", symbol: "BTC", image: "https://cryptologos.cc/logos/bitcoin-btc-logo.png", balance: 0.0 },
@@ -20,61 +20,62 @@ const ActivityList = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchBalancesAndMarketData = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          setError("No token found. Please log in again.");
-          navigate("/login");
-          return;
-        }
-
-        // Fetch user balances
-        const balanceResponse = await axios.get(`${API_URL}/api/users/balances`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const balanceData = balanceResponse.data; // Axios automatically parses JSON
-        if (!balanceData.success) {
-          throw new Error(balanceData.message || "Failed to fetch user balances.");
-        }
-
-        const userBalances = balanceData.balances;
-
-        // Fetch market data
-        const coinIds = defaultCoins.map((coin) => coin.id).join(",");
-        const marketResponse = await fetch(
-          `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${coinIds}&order=market_cap_desc&sparkline=false`
-        );
-
-        if (!marketResponse.ok) {
-          const marketErrorText = await marketResponse.text();
-          console.error("Error response from CoinGecko:", marketErrorText);
-          throw new Error("Failed to fetch market data.");
-        }
-
-        const marketData = await marketResponse.json();
-
-        // Merge user balances with market data
-        const updatedCoins = defaultCoins.map((coin) => {
-          const marketInfo = marketData.find((data) => data.id === coin.id);
-          return {
-            ...coin,
-            current_price: marketInfo?.current_price || 0.0,
-            price_change_percentage_24h: marketInfo?.price_change_percentage_24h || 0.0,
-            balance: userBalances?.[coin.id] || 0.0,
-          };
-        });
-
-        setCoins(updatedCoins);
-      } catch (error) {
-        console.error("Error fetching data:", error.message);
-        setError("Failed to load data. Please try again.");
-      } finally {
-        setIsLoading(false);
+    const fetchBalancesAndMarketData = () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("No token found. Please log in again.");
+        navigate("/login");
+        return;
       }
+
+      // Fetch user balances
+      $.ajax({
+        url: `${API_URL}/api/users/balances`,
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        success: (balanceData) => {
+          if (!balanceData.success) {
+            setError("Failed to fetch user balances.");
+            setIsLoading(false);
+            return;
+          }
+
+          const userBalances = balanceData.balances;
+
+          // Fetch market data from CoinGecko
+          const coinIds = defaultCoins.map((coin) => coin.id).join(",");
+          $.ajax({
+            url: `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${coinIds}&order=market_cap_desc&sparkline=false`,
+            method: "GET",
+            success: (marketData) => {
+              const updatedCoins = defaultCoins.map((coin) => {
+                const marketInfo = marketData.find((data) => data.id === coin.id);
+                return {
+                  ...coin,
+                  current_price: marketInfo?.current_price || 0.0,
+                  price_change_percentage_24h: marketInfo?.price_change_percentage_24h || 0.0,
+                  balance: userBalances?.[coin.id] || 0.0,
+                };
+              });
+
+              setCoins(updatedCoins);
+              setIsLoading(false);
+            },
+            error: (error) => {
+              console.error("Error fetching market data:", error);
+              setError("Failed to fetch market data.");
+              setIsLoading(false);
+            },
+          });
+        },
+        error: (error) => {
+          console.error("Error fetching user balances:", error);
+          setError("Failed to load user balances.");
+          setIsLoading(false);
+        },
+      });
     };
 
     fetchBalancesAndMarketData();
@@ -87,21 +88,24 @@ const ActivityList = () => {
 
   const handleCoinClick = (coin) => {
     navigate(`/transaction/:type/${coin.id}`, {
-      state: { coin }, // Pass the full coin data to the TransactionForm component
+      state: { coin },
     });
   };
 
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
-        {Array.from({ length: 6 }).map((_, index) => (
+        {defaultCoins.map((coin, index) => (
           <div
             key={index}
             className="p-4 bg-gray-800 rounded-lg shadow-md animate-pulse"
           >
-            <div className="h-6 bg-pink-700 rounded mb-4"></div>
-            <div className="h-4 bg-pink-700 rounded mb-2"></div>
-            <div className="h-4 bg-pink-700 rounded"></div>
+            <div className="flex items-center mb-4">
+              <div className="h-8 w-8 bg-gray-600 rounded-full"></div>
+              <div className="ml-4 w-24 h-6 bg-gray-600 rounded"></div>
+            </div>
+            <div className="h-4 bg-gray-600 rounded mb-2"></div>
+            <div className="h-4 bg-gray-600 rounded"></div>
           </div>
         ))}
       </div>
@@ -111,7 +115,9 @@ const ActivityList = () => {
   if (error) {
     return (
       <div className="text-center py-10">
-        <p className="text-lg font-semibold text-red-400">{error}</p>
+        <p className="text-lg font-semibold text-red-400">
+          {error.includes("token") ? "Authentication error. Please log in again." : error}
+        </p>
         <button
           onClick={() => window.location.reload()}
           className="mt-4 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
@@ -133,7 +139,7 @@ const ActivityList = () => {
             role="button"
             tabIndex="0"
             aria-label={`View details for ${coin.name}`}
-            onClick={() => handleCoinClick(coin)} // Pass the full coin object
+            onClick={() => handleCoinClick(coin)}
           >
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center space-x-3">
@@ -147,9 +153,7 @@ const ActivityList = () => {
                   <p className="text-sm text-gray-400">Balance: {formatNumber(coin.balance || 0)}</p>
                   <p className="text-sm text-gray-400">Market Price: ${formatNumber(coin.current_price || 0)}</p>
                   <p
-                    className={`text-sm ${
-                      coin.price_change_percentage_24h >= 0 ? "text-green-400" : "text-red-400"
-                    }`}
+                    className={`text-sm ${coin.price_change_percentage_24h >= 0 ? "text-green-400" : "text-red-400"}`}
                   >
                     24h Change: {formatNumber(coin.price_change_percentage_24h || 0)}%
                   </p>
