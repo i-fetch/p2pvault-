@@ -9,8 +9,7 @@ const BalanceCard = ({ userTier = "Basic Level" }) => {
   const [username, setUsername] = useState("");
   const [walletID, setWalletID] = useState(""); // State for wallet ID
   const navigate = useNavigate();
-  const API_URL =process.env.REACT_APP_API_URL2;
-
+  const API_URL = process.env.REACT_APP_API_URL2;
 
   // Define the default coin data
   const coinsData = [
@@ -39,43 +38,35 @@ const BalanceCard = ({ userTier = "Basic Level" }) => {
         });
 
         setUsername(response.data.username);
-        setWalletID(response.data.wallet_id); // Set wallet ID from response
+        setWalletID(response.data.wallet_id);
 
-        // Fetch coin balances
-        const balanceResponse = await fetch(`${API_URL}/api/users/balances`, {
-          method: "GET",
-          headers: { Authorization: `Bearer ${token}` },
+        // Fetch coin balances and prices in parallel
+        const [balanceResponse, priceResponses] = await Promise.all([
+          axios.get(`${API_URL}/api/users/balances`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          Promise.all(
+            coinsData.map((coin) =>
+              axios
+                .get(`https://api.coingecko.com/api/v3/simple/price?ids=${coin.id}&vs_currencies=usd`)
+                .then((res) => ({ id: coin.id, price: res.data[coin.id]?.usd || 0 }))
+                .catch((error) => {
+                  console.error(`Error fetching price for ${coin.id}:`, error);
+                  return { id: coin.id, price: 0 };
+                })
+            )
+          ),
+        ]);
+
+        // Update coin data with balances and prices
+        const userBalances = balanceResponse.data.balances;
+        const updatedCoins = coinsData.map((coin) => {
+          const balance = userBalances?.[coin.id] || 0.0;
+          const price = priceResponses.find((price) => price.id === coin.id)?.price || 0;
+          return { ...coin, balance, current_price: price };
         });
 
-        if (!balanceResponse.ok) {
-          throw new Error("Failed to fetch user balances.");
-        }
-
-        const balanceData = await balanceResponse.json();
-        const userBalances = balanceData.balances;
-
-        // Update coins data with user balances
-        let updatedCoins = coinsData.map((coin) => {
-          return {
-            ...coin,
-            balance: userBalances?.[coin.id] || 0.0,
-          };
-        });
-
-        // Fetch current prices for each coin (using CoinGecko API or any other API)
-        const pricePromises = updatedCoins.map(async (coin) => {
-          try {
-            const priceResponse = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${coin.id}&vs_currencies=usd`);
-            const currentPrice = priceResponse.data[coin.id]?.usd || 0;
-            return { ...coin, current_price: currentPrice };
-          } catch (error) {
-            console.error("Error fetching coin price:", error);
-            return { ...coin, current_price: 0 }; // Fallback if price fetch fails
-          }
-        });
-
-        const coinsWithPrices = await Promise.all(pricePromises);
-        setCoins(coinsWithPrices);
+        setCoins(updatedCoins);
       } catch (error) {
         console.error("Error fetching data:", error);
         navigate("/login");
@@ -83,7 +74,7 @@ const BalanceCard = ({ userTier = "Basic Level" }) => {
     };
 
     fetchData();
-  }, [navigate]);
+  }, [navigate, API_URL]);
 
   // Calculate total balance based on coins data
   useEffect(() => {
