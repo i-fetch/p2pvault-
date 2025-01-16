@@ -1,13 +1,15 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-const API_URL = "p2pvaultuserbackend-production.up.railway.app";
 
-const KYCSubmission = ({ API_URL }) => {
+
+const KYCSubmission = () => {
   const [idType, setIdType] = useState("");
   const [frontImage, setFrontImage] = useState(null);
   const [backImage, setBackImage] = useState(null);
   const [loading, setLoading] = useState(false);
+  const API_URL = process.env.REACT_APP_API_URL2;
+
 
   const handleFileChange = (e, setImage) => {
     const file = e.target.files[0];
