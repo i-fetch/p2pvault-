@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
+const API_URL = process.env.REACT_APP_API_URL2;
+
 
 const KYCSubmission = ({ API_URL }) => {
   const [idType, setIdType] = useState("");
   const [frontImage, setFrontImage] = useState(null);
   const [backImage, setBackImage] = useState(null);
   const [loading, setLoading] = useState(false);
-  const API_URL = process.env.REACT_APP_API_URL2;
 
   const handleFileChange = (e, setImage) => {
     const file = e.target.files[0];
