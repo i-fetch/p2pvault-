@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
+const API_URL = process.env.REACT_APP_API_URL2
 
 const KYCSubmission = ({ API_URL }) => {
   const [idType, setIdType] = useState("");
@@ -41,7 +42,7 @@ const KYCSubmission = ({ API_URL }) => {
     formData.append("backDocType", idType);
 
     try {
-      const response = await axios.post(`${API_URL}/api/kyc/submit`, formData, {
+      const response = await axios.post(`${API_}/api/kyc/submit`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
