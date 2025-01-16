@@ -12,7 +12,17 @@ const KYCPage = () => {
 
   const idOptions = ["ID Card", "Driver's License", "Passport", "NIN"];
 
-  // Fetch KYC Status on page load
+  const toastOptions = {
+    position: "top-right",
+    autoClose: 3000,
+    hideProgressBar: true,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    className: "text-sm max-w-[90%] mx-auto", // Mobile-friendly styling
+  };
+
+  // Fetch KYC status on page load
   useEffect(() => {
     const fetchKycStatus = async () => {
       try {
@@ -24,11 +34,7 @@ const KYCPage = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-        if (response.data && response.data.status) {
-          setKycStatus(response.data.status);
-        } else {
-          setKycStatus("notSubmitted");
-        }
+        setKycStatus(response.data.status || "notSubmitted");
       } catch (error) {
         console.error("Error fetching KYC status:", error);
         setKycStatus("notSubmitted");
@@ -40,7 +46,19 @@ const KYCPage = () => {
 
   const handleImageSelect = (e, type) => {
     const file = e.target.files[0];
+    const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
+
     if (file) {
+      if (!allowedTypes.includes(file.type)) {
+        toast.error("Only JPG and PNG files are allowed.", toastOptions);
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("File size must be less than 5MB.", toastOptions);
+        return;
+      }
+
       if (type === "front") {
         setFrontImage(file);
       } else {
@@ -50,13 +68,18 @@ const KYCPage = () => {
   };
 
   const handleSubmit = async () => {
+    if (kycStatus === "submitted" || kycStatus === "verified") {
+      toast.info("You have already submitted your KYC.", toastOptions);
+      return;
+    }
+
     if (!idType) {
-      toast.error("Please select the type of ID you are uploading.", { position: "top-right" });
+      toast.error("Please select the type of ID you are uploading.", toastOptions);
       return;
     }
 
     if (!frontImage || !backImage) {
-      toast.error("Please upload both the front and back images of your ID.", { position: "top-right" });
+      toast.error("Please upload both the front and back images of your ID.", toastOptions);
       return;
     }
 
@@ -64,7 +87,7 @@ const KYCPage = () => {
 
     const token = localStorage.getItem("token");
     if (!token) {
-      toast.error("Authentication token is missing.", { position: "top-right" });
+      toast.error("Authentication token is missing.", toastOptions);
       setLoading(false);
       return;
     }
@@ -81,20 +104,18 @@ const KYCPage = () => {
         {
           headers: {
             Authorization: `Bearer ${token}`,
-          
+            "Content-Type": "multipart/form-data",
           },
         }
       );
 
-      if (response.data && response.data.message) {
-        toast.success(response.data.message, { position: "top-right" });
-        setKycStatus("submitted"); // Update KYC status to 'submitted'
-      } else {
-        toast.error("Error submitting KYC. Please try again.", { position: "top-right" });
+      if (response.data.message) {
+        toast.success(response.data.message, toastOptions);
+        setKycStatus("submitted");
       }
     } catch (error) {
       console.error("Error submitting KYC:", error);
-      toast.error("Error submitting KYC. Please try again.", { position: "top-right" });
+      toast.error("Error submitting KYC. Please try again.", toastOptions);
     } finally {
       setLoading(false);
     }
@@ -158,7 +179,9 @@ const KYCPage = () => {
       <button
         onClick={handleSubmit}
         disabled={loading || kycStatus === "submitted" || kycStatus === "verified"}
-        className="mt-4 w-full bg-blue-600 text-white py-2 rounded-md"
+        className={`mt-4 w-full ${
+          loading ? "bg-gray-600" : "bg-blue-600"
+        } text-white py-2 rounded-md`}
       >
         {loading ? "Submitting..." : "Submit KYC"}
       </button>
