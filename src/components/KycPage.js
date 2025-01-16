@@ -49,63 +49,34 @@ const KYCPage = () => {
     }
   };
 
-  // Upload image to Blob via serverless function
-  const uploadToBlob = async (file) => {
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      const response = await axios.post(`${API_URL}/api/kyc/upload-to-blob`, formData);
-      if (response.data && response.data.url) {
-        return response.data.url;
-      } else {
-        throw new Error("Failed to upload to Blob.");
-      }
-    } catch (error) {
-      console.error("Error uploading to Blob:", error);
-      toast.error("Failed to upload file. Please try again.", { position: "top-right" });
-      return null;
-    }
-  };
-
   // Handle form submission
   const handleSubmit = async () => {
     if (!idType) {
       toast.error("Please select the type of ID you are uploading.", { position: "top-right" });
       return;
     }
-  
+
     if (!frontImage || !backImage) {
       toast.error("Please upload both the front and back images of your ID.", { position: "top-right" });
       return;
     }
-  
+
     setLoading(true);
-  
+
     const token = localStorage.getItem("token");
     if (!token) {
       toast.error("Authentication token is missing.", { position: "top-right" });
       setLoading(false);
       return;
     }
-  
+
     try {
-      // Upload images to Blob
-      const frontImageUrl = await uploadToBlob(frontImage);
-      const backImageUrl = await uploadToBlob(backImage);
-  
-      if (!frontImageUrl || !backImageUrl) {
-        toast.error("Failed to upload one or more files. Please try again.", { position: "top-right" });
-        setLoading(false);
-        return;
-      }
-  
-      // Create a FormData object
+      // Create a FormData object and append images and ID type
       const formData = new FormData();
-      formData.append("frontImage", frontImageUrl); // Append Blob URL
-      formData.append("backImage", backImageUrl);   // Append Blob URL
-      formData.append("idType", idType);           // Add selected ID type
-  
+      formData.append("frontImage", frontImage);
+      formData.append("backImage", backImage);
+      formData.append("idType", idType);
+
       // Send the data to the backend
       const response = await axios.post(
         `${API_URL}/api/kyc/submit`,
@@ -117,7 +88,7 @@ const KYCPage = () => {
           },
         }
       );
-  
+
       if (response.data && response.data.message) {
         toast.success(response.data.message, { position: "top-right" });
         setKycStatus("submitted");
@@ -131,11 +102,11 @@ const KYCPage = () => {
       setLoading(false);
     }
   };
-  
+
   return (
     <div className="w-full max-w-md mx-auto bg-stone-900 p-6 rounded-lg shadow-lg">
       <h2 className="text-2xl font-semibold text-white mb-4">KYC Verification</h2>
-      
+
       {kycStatus === null ? (
         <p className="text-white">Loading KYC status...</p>
       ) : kycStatus === "pending" ? (
