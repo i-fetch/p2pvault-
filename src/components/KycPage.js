@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-const API_URL = process.env.REACT_APP_API_URL2;
-
+const API_URL = "p2pvaultuserbackend-production.up.railway.app";
 
 const KYCSubmission = ({ API_URL }) => {
   const [idType, setIdType] = useState("");
