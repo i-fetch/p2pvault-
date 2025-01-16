@@ -69,7 +69,8 @@ const KYCPage = () => {
   };
 
   // Handle form submission
-  const handleSubmit = async () => {
+  // Handle form submission
+const handleSubmit = async () => {
   if (!idType) {
     toast.error("Please select the type of ID you are uploading.", { position: "top-right" });
     return;
@@ -90,24 +91,20 @@ const KYCPage = () => {
   }
 
   try {
-    // Upload images to Blob
-    const frontImageUrl = await uploadToBlob(frontImage);
-    const backImageUrl = await uploadToBlob(backImage);
+    // Create a FormData object
+    const formData = new FormData();
+    formData.append("frontImage", frontImage);
+    formData.append("backImage", backImage);
+    formData.append("idType", idType); // Send the selected ID type
 
-    if (!frontImageUrl || !backImageUrl) {
-      throw new Error("Image upload failed.");
-    }
-
-    // Send Blob URLs and ID type to the backend
+    // Send the data to the backend
     const response = await axios.post(
       `${API_URL}/api/kyc/submit`,
-      {
-        idType,  // Sending the same ID type for both images
-      },
+      formData,
       {
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json", // Content type updated to JSON
+          "Content-Type": "multipart/form-data", // Use multipart/form-data for sending both files and form data
         },
       }
     );
