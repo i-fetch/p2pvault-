@@ -55,7 +55,7 @@ const KYCPage = () => {
     formData.append("file", file);
 
     try {
-      const response = await axios.post(`${API_URL}/api/upload-to-blob`, formData);
+      const response = await axios.post(`${API_URL}/api/kyc/upload-to-blob`, formData);
       if (response.data && response.data.url) {
         return response.data.url;
       } else {
@@ -69,61 +69,69 @@ const KYCPage = () => {
   };
 
   // Handle form submission
-  // Handle form submission
-const handleSubmit = async () => {
-  if (!idType) {
-    toast.error("Please select the type of ID you are uploading.", { position: "top-right" });
-    return;
-  }
-
-  if (!frontImage || !backImage) {
-    toast.error("Please upload both the front and back images of your ID.", { position: "top-right" });
-    return;
-  }
-
-  setLoading(true);
-
-  const token = localStorage.getItem("token");
-  if (!token) {
-    toast.error("Authentication token is missing.", { position: "top-right" });
-    setLoading(false);
-    return;
-  }
-
-  try {
-    // Create a FormData object
-    const formData = new FormData();
-    formData.append("frontImage", frontImage);
-    formData.append("backImage", backImage);
-    formData.append("idType", idType); // Send the selected ID type
-
-    // Send the data to the backend
-    const response = await axios.post(
-      `${API_URL}/api/kyc/submit`,
-      formData,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data", // Use multipart/form-data for sending both files and form data
-        },
-      }
-    );
-
-    if (response.data && response.data.message) {
-      toast.success(response.data.message, { position: "top-right" });
-      setKycStatus("submitted");
-    } else {
-      toast.error("Error submitting KYC. Please try again.", { position: "top-right" });
+  const handleSubmit = async () => {
+    if (!idType) {
+      toast.error("Please select the type of ID you are uploading.", { position: "top-right" });
+      return;
     }
-  } catch (error) {
-    console.error("Error submitting KYC:", error);
-    toast.error("Error submitting KYC. Please try again.", { position: "top-right" });
-  } finally {
-    setLoading(false);
-  }
-};
-
-
+  
+    if (!frontImage || !backImage) {
+      toast.error("Please upload both the front and back images of your ID.", { position: "top-right" });
+      return;
+    }
+  
+    setLoading(true);
+  
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("Authentication token is missing.", { position: "top-right" });
+      setLoading(false);
+      return;
+    }
+  
+    try {
+      // Upload images to Blob
+      const frontImageUrl = await uploadToBlob(frontImage);
+      const backImageUrl = await uploadToBlob(backImage);
+  
+      if (!frontImageUrl || !backImageUrl) {
+        toast.error("Failed to upload one or more files. Please try again.", { position: "top-right" });
+        setLoading(false);
+        return;
+      }
+  
+      // Create a FormData object
+      const formData = new FormData();
+      formData.append("frontImage", frontImageUrl); // Append Blob URL
+      formData.append("backImage", backImageUrl);   // Append Blob URL
+      formData.append("idType", idType);           // Add selected ID type
+  
+      // Send the data to the backend
+      const response = await axios.post(
+        `${API_URL}/api/kyc/submit`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+  
+      if (response.data && response.data.message) {
+        toast.success(response.data.message, { position: "top-right" });
+        setKycStatus("submitted");
+      } else {
+        toast.error("Error submitting KYC. Please try again.", { position: "top-right" });
+      }
+    } catch (error) {
+      console.error("Error submitting KYC:", error);
+      toast.error("Error submitting KYC. Please try again.", { position: "top-right" });
+    } finally {
+      setLoading(false);
+    }
+  };
+  
   return (
     <div className="w-full max-w-md mx-auto bg-stone-900 p-6 rounded-lg shadow-lg">
       <h2 className="text-2xl font-semibold text-white mb-4">KYC Verification</h2>
