@@ -25,16 +25,6 @@ import ForgotPasswordPage from "./pages/ForgotPassword";
 import ResetPasswordPage from "./pages/ResetLink";
 import NotFoundPage from "./pages/NotFoundPage"; // 404 Page
 
-const MarqueeNotice = () => {
-  return (
-    <div className="bg-red-600 text-white text-sm md:text-base py-2">
-      <marquee behavior="scroll" direction="left" className="overflow-hidden">
-        🚧 The site is currently under construction. Some features may not work
-        as expected. Thank you for your patience! 🚧
-      </marquee>
-    </div>
-  );
-};
 
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem("token");
@@ -92,8 +82,7 @@ const App = () => {
     <TransactionProvider>
       <ToastContainer position="top-right" autoClose={3000} />
       <Router>
-        {/* Add the MarqueeNotice */}
-        <MarqueeNotice />
+        
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<HomePage />} />

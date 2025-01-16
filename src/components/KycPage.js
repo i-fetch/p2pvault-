@@ -1,109 +1,133 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { toast } from "react-toastify";
 
-
-const KYCSubmission = () => {
-  const [idType, setIdType] = useState("");
+const KycPage = () => {
   const [frontImage, setFrontImage] = useState(null);
   const [backImage, setBackImage] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const API_URL = process.env.REACT_APP_API_URL2;
+  const [frontText, setFrontText] = useState("");
+  const [backText, setBackText] = useState("");
+  const [frontDocType, setFrontDocType] = useState("");
+  const [backDocType, setBackDocType] = useState("");
+  const [kycStatus, setKycStatus] = useState("notSubmitted");
+  const [error, setError] = useState(null);
+  const API_URL= process.env.REACT_APP_API_URL2;
 
-
-  const handleFileChange = (e, setImage) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImage(file);
-    }
-  };
+  useEffect(() => {
+    // Fetch the current KYC status on page load
+    const fetchKycStatus = async () => {
+      const token = localStorage.getItem("token");
+      try {
+        const response = await axios.get(`${API_URL}/api/kyc/status`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setKycStatus(response.data.status);
+      } catch (err) {
+        setError("Error fetching KYC status.");
+      }
+    };
+    fetchKycStatus();
+  }, []);
 
   const handleSubmit = async () => {
-    if (!idType || !frontImage || !backImage) {
-      toast.error("Please complete all fields before submitting.", { position: "top-right" });
-      return;
-    }
-
-    setLoading(true);
-
     const token = localStorage.getItem("token");
-    if (!token) {
-      toast.error("Authentication token is missing.", { position: "top-right" });
-      setLoading(false);
-      return;
-    }
 
     const formData = new FormData();
     formData.append("frontImage", frontImage);
     formData.append("backImage", backImage);
-    formData.append("frontDocType", idType);
-    formData.append("backDocType", idType);
+    formData.append("frontText", frontText);
+    formData.append("backText", backText);
+    formData.append("frontDocType", frontDocType);
+    formData.append("backDocType", backDocType);
 
     try {
       const response = await axios.post(`${API_URL}/api/kyc/submit`, formData, {
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
         },
       });
-
-      if (response.data.message) {
-        toast.success("KYC submitted successfully!", { position: "top-right" });
-      } else {
-        toast.error(response.data.message || "KYC submission failed.", { position: "top-right" });
-      }
-    } catch (error) {
-      console.error("Error submitting KYC:", error);
-      toast.error("An error occurred while submitting your KYC. Please try again.", { position: "top-right" });
-    } finally {
-      setLoading(false);
+      setKycStatus("awaiting approval");
+      alert("KYC submitted successfully!");
+    } catch (err) {
+      setError("Error submitting KYC.");
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white px-4">
-      <div className="w-full max-w-md bg-gray-800 rounded-lg shadow-md p-6">
-        <h1 className="text-2xl font-semibold text-center mb-4">KYC Submission</h1>
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">ID Type</label>
+    <div className="min-h-screen bg-stone-900 text-white p-8">
+      <h2 className="text-3xl font-semibold mb-6">Submit KYC</h2>
+      {kycStatus === "notSubmitted" && (
+        <div className="bg-stone-800 p-6 rounded-lg shadow-md">
+          <input
+            type="file"
+            className="block w-full mb-4 text-sm text-gray-300"
+            onChange={(e) => setFrontImage(e.target.files[0])}
+          />
+          <input
+            type="file"
+            className="block w-full mb-4 text-sm text-gray-300"
+            onChange={(e) => setBackImage(e.target.files[0])}
+          />
           <input
             type="text"
-            value={idType}
-            onChange={(e) => setIdType(e.target.value)}
-            className="w-full p-2 border border-gray-600 rounded bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter ID type (e.g., Passport, Driver's License)"
+            placeholder="Front Text"
+            className="block w-full p-3 mb-4 bg-stone-700 text-white rounded-md"
+            value={frontText}
+            onChange={(e) => setFrontText(e.target.value)}
           />
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Front Image</label>
           <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => handleFileChange(e, setFrontImage)}
-            className="w-full p-2 border border-gray-600 rounded bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            type="text"
+            placeholder="Back Text"
+            className="block w-full p-3 mb-4 bg-stone-700 text-white rounded-md"
+            value={backText}
+            onChange={(e) => setBackText(e.target.value)}
           />
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Back Image</label>
           <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => handleFileChange(e, setBackImage)}
-            className="w-full p-2 border border-gray-600 rounded bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            type="text"
+            placeholder="Front Document Type"
+            className="block w-full p-3 mb-4 bg-stone-700 text-white rounded-md"
+            value={frontDocType}
+            onChange={(e) => setFrontDocType(e.target.value)}
           />
+          <input
+            type="text"
+            placeholder="Back Document Type"
+            className="block w-full p-3 mb-4 bg-stone-700 text-white rounded-md"
+            value={backDocType}
+            onChange={(e) => setBackDocType(e.target.value)}
+          />
+          <button
+            onClick={handleSubmit}
+            className="w-full py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition duration-300"
+          >
+            Submit
+          </button>
         </div>
-        <button
-          onClick={handleSubmit}
-          disabled={loading}
-          className={`w-full py-2 px-4 rounded text-white font-semibold ${
-            loading ? "bg-gray-600" : "bg-blue-500 hover:bg-blue-600"
-          }`}
-        >
-          {loading ? "Submitting..." : "Submit KYC"}
-        </button>
-      </div>
+      )}
+
+      {kycStatus === "awaiting approval" && (
+        <p className="text-lg text-yellow-400 mt-6">KYC is awaiting approval.</p>
+      )}
+      {kycStatus === "approved" && (
+        <p className="text-lg text-green-400 mt-6">KYC has been approved.</p>
+      )}
+      {kycStatus === "rejected" && (
+        <div className="mt-6">
+          <p className="text-lg text-red-400">KYC has been rejected. Please submit again.</p>
+          <button
+            onClick={() => setKycStatus("notSubmitted")}
+            className="mt-4 py-2 px-6 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+          >
+            Resubmit
+          </button>
+        </div>
+      )}
+
+      {error && <p className="text-red-500 mt-4">{error}</p>}
     </div>
   );
 };
 
-export default KYCSubmission;
+export default KycPage;
