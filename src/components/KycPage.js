@@ -7,6 +7,7 @@ const KYCSubmission = ({ API_URL }) => {
   const [frontImage, setFrontImage] = useState(null);
   const [backImage, setBackImage] = useState(null);
   const [loading, setLoading] = useState(false);
+  const API_URL = process.env.REACT_APP_API_URL2;
 
   const handleFileChange = (e, setImage) => {
     const file = e.target.files[0];
