@@ -12,6 +12,7 @@ const KYCPage = () => {
 
   const idOptions = ["ID Card", "Driver's License", "Passport", "NIN"];
 
+  // Fetch KYC Status on page load
   useEffect(() => {
     const fetchKycStatus = async () => {
       try {
@@ -37,7 +38,6 @@ const KYCPage = () => {
     fetchKycStatus();
   }, []);
 
-  // Handle image file selection
   const handleImageSelect = (e, type) => {
     const file = e.target.files[0];
     if (file) {
@@ -49,7 +49,6 @@ const KYCPage = () => {
     }
   };
 
-  // Handle form submission
   const handleSubmit = async () => {
     if (!idType) {
       toast.error("Please select the type of ID you are uploading.", { position: "top-right" });
@@ -70,14 +69,12 @@ const KYCPage = () => {
       return;
     }
 
-    try {
-      // Create a FormData object and append images and ID type
-      const formData = new FormData();
-      formData.append("frontImage", frontImage);
-      formData.append("backImage", backImage);
-      formData.append("idType", idType);
+    const formData = new FormData();
+    formData.append("frontImage", frontImage);
+    formData.append("backImage", backImage);
+    formData.append("idType", idType);
 
-      // Send the data to the backend
+    try {
       const response = await axios.post(
         `${API_URL}/api/kyc/submit`,
         formData,
@@ -91,7 +88,7 @@ const KYCPage = () => {
 
       if (response.data && response.data.message) {
         toast.success(response.data.message, { position: "top-right" });
-        setKycStatus("submitted");
+        setKycStatus("submitted"); // Update KYC status to 'submitted'
       } else {
         toast.error("Error submitting KYC. Please try again.", { position: "top-right" });
       }
@@ -107,18 +104,23 @@ const KYCPage = () => {
     <div className="w-full max-w-md mx-auto bg-stone-900 p-6 rounded-lg shadow-lg">
       <h2 className="text-2xl font-semibold text-white mb-4">KYC Verification</h2>
 
-      {kycStatus === null ? (
-        <p className="text-white">Loading KYC status...</p>
-      ) : kycStatus === "pending" ? (
-        <p className="text-yellow-400">Your KYC is pending approval.</p>
-      ) : kycStatus === "approved" ? (
-        <p className="text-green-400">Your KYC has been approved.</p>
-      ) : kycStatus === "rejected" ? (
-        <p className="text-red-400">Your KYC has been rejected. Please try again.</p>
-      ) : (
-        <p className="text-white">You have not submitted your KYC yet.</p>
-      )}
+      {/* Display KYC Status */}
+      <div className="mb-4">
+        {kycStatus === "pending" && (
+          <p className="text-yellow-400">Your KYC is pending approval.</p>
+        )}
+        {kycStatus === "verified" && (
+          <p className="text-green-400">Your KYC has been verified!</p>
+        )}
+        {kycStatus === "notSubmitted" && (
+          <p className="text-red-400">You have not submitted your KYC yet.</p>
+        )}
+        {kycStatus === "submitted" && (
+          <p className="text-blue-400">Your KYC is under review.</p>
+        )}
+      </div>
 
+      {/* Render KYC Form */}
       <div>
         <label className="block text-white">ID Type</label>
         <select
@@ -155,7 +157,7 @@ const KYCPage = () => {
 
       <button
         onClick={handleSubmit}
-        disabled={loading}
+        disabled={loading || kycStatus === "submitted" || kycStatus === "verified"}
         className="mt-4 w-full bg-blue-600 text-white py-2 rounded-md"
       >
         {loading ? "Submitting..." : "Submit KYC"}
