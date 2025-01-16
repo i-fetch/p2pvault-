@@ -12,7 +12,6 @@ const KYCPage = () => {
 
   const idOptions = ["ID Card", "Driver's License", "Passport", "NIN"];
 
-  // Fetch KYC status on page load
   useEffect(() => {
     const fetchKycStatus = async () => {
       try {
@@ -55,11 +54,8 @@ const KYCPage = () => {
     const formData = new FormData();
     formData.append("file", file);
 
-    console.log("FormData being sent: ", formData);  // Debugging FormData
-
     try {
       const response = await axios.post(`${API_URL}/api/upload-to-blob`, formData);
-      console.log("Response from Blob API: ", response);  // Debugging the Blob API response
       if (response.data && response.data.url) {
         return response.data.url;
       } else {
@@ -106,8 +102,6 @@ const KYCPage = () => {
       const response = await axios.post(
         `${API_URL}/api/kyc/submit`,
         {
-          frontImageUrl,
-          backImageUrl,
           frontDocType: idType,
           backDocType: idType,
         },
@@ -118,17 +112,15 @@ const KYCPage = () => {
         }
       );
 
-      if (response.data.message) {
-        setKycStatus("pending");
-        toast.success("KYC submitted successfully!", { position: "top-right" });
+      if (response.data && response.data.message) {
+        toast.success(response.data.message, { position: "top-right" });
+        setKycStatus("submitted");
       } else {
-        toast.error(response.data.message || "KYC submission failed.", { position: "top-right" });
+        toast.error("Error submitting KYC. Please try again.", { position: "top-right" });
       }
     } catch (error) {
       console.error("Error submitting KYC:", error);
-      toast.error("An error occurred while submitting your KYC. Please try again.", {
-        position: "top-right",
-      });
+      toast.error("Error submitting KYC. Please try again.", { position: "top-right" });
     } finally {
       setLoading(false);
     }
