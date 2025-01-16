@@ -1,14 +1,11 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-const API_URL = process.env.REACT_APP_API_URL2
 
 const KYCSubmission = ({ API_URL }) => {
   const [idType, setIdType] = useState("");
   const [frontImage, setFrontImage] = useState(null);
   const [backImage, setBackImage] = useState(null);
-  const [frontText, setFrontText] = useState("");
-  const [backText, setBackText] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleFileChange = (e, setImage) => {
@@ -36,13 +33,11 @@ const KYCSubmission = ({ API_URL }) => {
     const formData = new FormData();
     formData.append("frontImage", frontImage);
     formData.append("backImage", backImage);
-    formData.append("frontText", frontText);
-    formData.append("backText", backText);
     formData.append("frontDocType", idType);
     formData.append("backDocType", idType);
 
     try {
-      const response = await axios.post(`${API_}/api/kyc/submit`, formData, {
+      const response = await axios.post(`${API_URL}/api/kyc/submit`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
@@ -92,24 +87,6 @@ const KYCSubmission = ({ API_URL }) => {
             accept="image/*"
             onChange={(e) => handleFileChange(e, setBackImage)}
             className="w-full p-2 border border-gray-600 rounded bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Additional Front Text</label>
-          <textarea
-            value={frontText}
-            onChange={(e) => setFrontText(e.target.value)}
-            className="w-full p-2 border border-gray-600 rounded bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter additional details for the front side"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Additional Back Text</label>
-          <textarea
-            value={backText}
-            onChange={(e) => setBackText(e.target.value)}
-            className="w-full p-2 border border-gray-600 rounded bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter additional details for the back side"
           />
         </div>
         <button
