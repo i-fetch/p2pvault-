@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import Tesseract from "tesseract.js";
 import { toast } from "react-toastify";
 import axios from "axios";
 
@@ -56,8 +55,11 @@ const KYCPage = () => {
     const formData = new FormData();
     formData.append("file", file);
 
+    console.log("FormData being sent: ", formData);  // Debugging FormData
+
     try {
       const response = await axios.post(`${API_URL}/api/upload-to-blob`, formData);
+      console.log("Response from Blob API: ", response);  // Debugging the Blob API response
       if (response.data && response.data.url) {
         return response.data.url;
       } else {
