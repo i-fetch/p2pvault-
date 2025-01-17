@@ -31,14 +31,16 @@ const KycPage = () => {
         return;
       }
 
-      // Upload the front image
+      // Upload the front image to Vercel Blob
       const frontBlob = await upload(frontFile, {
-        access: "public",
+        access: "public", // Set the file access to public
+        handleUploadUrl: "/api/kyc/upload", // Vercel's upload endpoint
       });
 
-      // Upload the back image
+      // Upload the back image to Vercel Blob
       const backBlob = await upload(backFile, {
-        access: "public",
+        access: "public", // Set the file access to public
+        handleUploadUrl: "/api/kyc/upload", // Vercel's upload endpoint
       });
 
       // Save the uploaded URLs and ID type to the database via your backend
@@ -49,8 +51,8 @@ const KycPage = () => {
         },
         body: JSON.stringify({
           idType,
-          frontUrl: frontBlob.url,
-          backUrl: backBlob.url,
+          frontUrl: frontBlob.url, // Use the URL from Vercel Blob response
+          backUrl: backBlob.url, // Use the URL from Vercel Blob response
         }),
       });
 
@@ -112,9 +114,7 @@ const KycPage = () => {
         <button
           type="submit"
           disabled={loading}
-          className={`w-full py-2 rounded-md text-white ${
-            loading ? "bg-gray-600" : "bg-blue-600"
-          }`}
+          className={`w-full py-2 rounded-md text-white ${loading ? "bg-gray-600" : "bg-blue-600"}`}
         >
           {loading ? "Uploading..." : "Submit"}
         </button>
