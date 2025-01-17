@@ -119,7 +119,7 @@ const KycPage = () => {
         <button
           type="submit"
           disabled={loading}
-          className={`w-full py-2 rounded-md text-white ${loading ? "bg-gray-600" : "bg-pink-600"}`}
+          className={`w-full py-2 rounded-md text-white ${loading ? "bg-gray-800" : "bg-pink-600"}`}
         >
           {loading ? "Uploading..." : "Submit"}
         </button>
