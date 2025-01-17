@@ -96,33 +96,30 @@ const KYCPage = () => {
     formData.append("idType", idType);
     formData.append("frontImage", frontImage);
     formData.append("backImage", backImage);
-  
-    // Debugging: Log FormData content
+    
+    // Debugging
     for (let pair of formData.entries()) {
       console.log(pair[0], pair[1]);
     }
-  
+    
     try {
       const response = await axios.post(`${API_URL}/api/kyc/submit`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
-
         },
-        
       });
-  
+    
       if (response.data.message) {
         toast.success(response.data.message, toastOptions);
         setKycStatus("submitted");
       }
     } catch (error) {
-      console.error("Error submitting KYC:", error);
+      console.error("Error submitting KYC:", error.response?.data || error.message);
       toast.error("Error submitting KYC. Please try again.", toastOptions);
     } finally {
       setLoading(false);
     }
-  };
-  
+    
 
   return (
     <div className="w-full max-w-md mx-auto bg-stone-900 p-6 rounded-lg shadow-lg">
