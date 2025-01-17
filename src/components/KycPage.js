@@ -32,15 +32,13 @@ const KycPage = () => {
       }
 
       // Upload the front image
-      const frontBlob = await upload(frontFile.name, frontFile, {
+      const frontBlob = await upload(frontFile, {
         access: "public",
-        handleUploadUrl: "/api/kyc/upload",
       });
 
       // Upload the back image
-      const backBlob = await upload(backFile.name, backFile, {
+      const backBlob = await upload(backFile, {
         access: "public",
-        handleUploadUrl: "/api/kyc/upload",
       });
 
       // Save the uploaded URLs and ID type to the database via your backend
