@@ -72,43 +72,43 @@ const KYCPage = () => {
       toast.info("You have already submitted your KYC.", toastOptions);
       return;
     }
-
+  
     if (!idType) {
       toast.error("Please select the type of ID you are uploading.", toastOptions);
       return;
     }
-
+  
     if (!frontImage || !backImage) {
       toast.error("Please upload both the front and back images of your ID.", toastOptions);
       return;
     }
-
+  
     setLoading(true);
-
+  
     const token = localStorage.getItem("token");
     if (!token) {
       toast.error("Authentication token is missing.", toastOptions);
       setLoading(false);
       return;
     }
-
+  
     const formData = new FormData();
     formData.append("frontImage", frontImage);
     formData.append("backImage", backImage);
     formData.append("idType", idType);
-
+  
+    // Debugging: Log FormData content
+    for (let pair of formData.entries()) {
+      console.log(pair[0], pair[1]);
+    }
+  
     try {
-      const response = await axios.post(
-        `${API_URL}/api/kyc/submit`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
+      const response = await axios.post(`${API_URL}/api/kyc/submit`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
       if (response.data.message) {
         toast.success(response.data.message, toastOptions);
         setKycStatus("submitted");
@@ -120,6 +120,7 @@ const KYCPage = () => {
       setLoading(false);
     }
   };
+  
 
   return (
     <div className="w-full max-w-md mx-auto bg-stone-900 p-6 rounded-lg shadow-lg">
