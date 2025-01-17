@@ -34,20 +34,20 @@ const KycPage = () => {
       // Upload the front image to Vercel Blob
       const frontBlob = await upload(frontFile, {
         access: "public", // Set the file access to public
-        handleUploadUrl: "/api/kyc/upload", // Vercel's upload endpoint
+        // handleUploadUrl: "/api/kyc/upload", // Vercel's upload endpoint
       });
 
       // Upload the back image to Vercel Blob
       const backBlob = await upload(backFile, {
         access: "public", // Set the file access to public
-        handleUploadUrl: "/api/kyc/upload", // Vercel's upload endpoint
+        // handleUploadUrl: "/api/kyc/upload", // Vercel's upload endpoint
       });
 
       // Save the uploaded URLs and ID type to the database via your backend
       const response = await fetch("/api/kyc/submit", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "Multi-part/form-data",
         },
         body: JSON.stringify({
           idType,
