@@ -93,9 +93,9 @@ const KYCPage = () => {
     }
   
     const formData = new FormData();
+    formData.append("idType", idType);
     formData.append("frontImage", frontImage);
     formData.append("backImage", backImage);
-    formData.append("idType", idType);
   
     // Debugging: Log FormData content
     for (let pair of formData.entries()) {
