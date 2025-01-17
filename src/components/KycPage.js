@@ -44,26 +44,24 @@ const KYCPage = () => {
     fetchKycStatus();
   }, []);
 
+  const validateFile = (file) => {
+    const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Only JPG and PNG files are allowed.", toastOptions);
+      return false;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File size must be less than 5MB.", toastOptions);
+      return false;
+    }
+    return true;
+  };
+
   const handleImageSelect = (e, type) => {
     const file = e.target.files[0];
-    const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
-
-    if (file) {
-      if (!allowedTypes.includes(file.type)) {
-        toast.error("Only JPG and PNG files are allowed.", toastOptions);
-        return;
-      }
-
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error("File size must be less than 5MB.", toastOptions);
-        return;
-      }
-
-      if (type === "front") {
-        setFrontImage(file);
-      } else {
-        setBackImage(file);
-      }
+    if (file && validateFile(file)) {
+      if (type === "front") setFrontImage(file);
+      if (type === "back") setBackImage(file);
     }
   };
 
@@ -97,11 +95,6 @@ const KYCPage = () => {
     formData.append("frontImage", frontImage);
     formData.append("backImage", backImage);
 
-    // Debugging
-    for (let pair of formData.entries()) {
-      console.log(pair[0], pair[1]);
-    }
-
     try {
       const response = await axios.post(`${API_URL}/api/kyc/submit`, formData, {
         headers: {
@@ -114,80 +107,79 @@ const KYCPage = () => {
         setKycStatus("submitted");
       }
     } catch (error) {
-      console.error("Error submitting KYC:", error.response?.data || error.message);
+      console.error("Error submitting KYC:", error);
       toast.error("Error submitting KYC. Please try again.", toastOptions);
     } finally {
       setLoading(false);
     }
-
-
-
-    return (
-      <div className="w-full max-w-md mx-auto bg-stone-900 p-6 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-semibold text-white mb-4">KYC Verification</h2>
-
-        {/* Display KYC Status */}
-        <div className="mb-4">
-          {kycStatus === "pending" && (
-            <p className="text-yellow-400">Your KYC is pending approval.</p>
-          )}
-          {kycStatus === "verified" && (
-            <p className="text-green-400">Your KYC has been verified!</p>
-          )}
-          {kycStatus === "notSubmitted" && (
-            <p className="text-red-400">You have not submitted your KYC yet.</p>
-          )}
-          {kycStatus === "submitted" && (
-            <p className="text-blue-400">Your KYC is under review.</p>
-          )}
-        </div>
-
-        {/* Render KYC Form */}
-        <div>
-          <label className="block text-white">ID Type</label>
-          <select
-            className="w-full p-2 mb-4 bg-stone-800 text-white rounded"
-            value={idType}
-            onChange={(e) => setIdType(e.target.value)}
-          >
-            <option value="">Select ID Type</option>
-            {idOptions.map((option, index) => (
-              <option key={index} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-white">Front Image</label>
-          <input
-            type="file"
-            onChange={(e) => handleImageSelect(e, "front")}
-            className="w-full p-2 mb-4 bg-stone-800 text-white rounded"
-          />
-        </div>
-
-        <div>
-          <label className="block text-white">Back Image</label>
-          <input
-            type="file"
-            onChange={(e) => handleImageSelect(e, "back")}
-            className="w-full p-2 mb-4 bg-stone-800 text-white rounded"
-          />
-        </div>
-
-        <button
-          onClick={handleSubmit}
-          disabled={loading || kycStatus === "submitted" || kycStatus === "verified"}
-          className={`mt-4 w-full ${loading ? "bg-gray-600" : "bg-blue-600"
-            } text-white py-2 rounded-md`}
-        >
-          {loading ? "Submitting..." : "Submit KYC"}
-        </button>
-      </div>
-    );
   };
-}
+
+  return (
+    <div className="w-full max-w-md mx-auto bg-stone-900 p-6 rounded-lg shadow-lg">
+      <h2 className="text-2xl font-semibold text-white mb-4">KYC Verification</h2>
+
+      {/* Display KYC Status */}
+      <div className="mb-4">
+        {kycStatus === "pending" && (
+          <p className="text-yellow-400">Your KYC is pending approval.</p>
+        )}
+        {kycStatus === "verified" && (
+          <p className="text-green-400">Your KYC has been verified!</p>
+        )}
+        {kycStatus === "notSubmitted" && (
+          <p className="text-red-400">You have not submitted your KYC yet.</p>
+        )}
+        {kycStatus === "submitted" && (
+          <p className="text-blue-400">Your KYC is under review.</p>
+        )}
+      </div>
+
+      {/* Render KYC Form */}
+      <div>
+        <label className="block text-white">ID Type</label>
+        <select
+          className="w-full p-2 mb-4 bg-stone-800 text-white rounded"
+          value={idType}
+          onChange={(e) => setIdType(e.target.value)}
+        >
+          <option value="">Select ID Type</option>
+          {idOptions.map((option, index) => (
+            <option key={index} value={option}>
+              {option}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div>
+        <label className="block text-white">Front Image</label>
+        <input
+          type="file"
+          onChange={(e) => handleImageSelect(e, "front")}
+          className="w-full p-2 mb-4 bg-stone-800 text-white rounded"
+        />
+      </div>
+
+      <div>
+        <label className="block text-white">Back Image</label>
+        <input
+          type="file"
+          onChange={(e) => handleImageSelect(e, "back")}
+          className="w-full p-2 mb-4 bg-stone-800 text-white rounded"
+        />
+      </div>
+
+      <button
+        onClick={handleSubmit}
+        disabled={loading || kycStatus === "submitted" || kycStatus === "verified"}
+        className={`mt-4 w-full ${
+          loading ? "bg-gray-600" : "bg-blue-600"
+        } text-white py-2 rounded-md`}
+      >
+        {loading ? "Submitting..." : "Submit KYC"}
+      </button>
+    </div>
+  );
+};
 
 export default KYCPage;
