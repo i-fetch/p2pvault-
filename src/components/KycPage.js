@@ -103,14 +103,12 @@ const KYCPage = () => {
     }
   
     try {
-      const response = fetch(`${API_URL}/api/kyc/submit`,  {
-        method:"POST",
-
+      const response = await axios.post(`${API_URL}/api/kyc/submit`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
 
         },
-        body:formData
+        
       });
   
       if (response.data.message) {
