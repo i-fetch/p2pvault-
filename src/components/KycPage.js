@@ -14,52 +14,57 @@ const KycPage = () => {
     setLoading(true);
     setError(null);
     setSuccessMessage("");
-
+  
     if (!idType) {
       setError("Please select an ID type.");
       setLoading(false);
       return;
     }
-
+  
     try {
       const frontFile = frontFileRef.current.files[0];
       const backFile = backFileRef.current.files[0];
-
+  
       if (!frontFile || !backFile) {
         setError("Both front and back images are required.");
         setLoading(false);
         return;
       }
-
+  
+      // Ensure the file object is valid
+      if (!(frontFile instanceof File) || !(backFile instanceof File)) {
+        setError("Invalid file upload. Please try again.");
+        setLoading(false);
+        return;
+      }
+  
       // Upload the front image to Vercel Blob
       const frontBlob = await upload(frontFile, {
-        access: "public", // Set the file access to public
-        // handleUploadUrl: "/api/kyc/upload", // Vercel's upload endpoint
+        access: "public",
       });
-
+  
       // Upload the back image to Vercel Blob
       const backBlob = await upload(backFile, {
-        access: "public", // Set the file access to public
-        // handleUploadUrl: "/api/kyc/upload", // Vercel's upload endpoint
+        access: "public",
       });
-
+  
       // Save the uploaded URLs and ID type to the database via your backend
       const response = await fetch("/api/kyc/submit", {
         method: "POST",
         headers: {
-          "Content-Type": "Multi-part/form-data",
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           idType,
-          frontUrl: frontBlob.url, // Use the URL from Vercel Blob response
-          backUrl: backBlob.url, // Use the URL from Vercel Blob response
+          frontUrl: frontBlob.url,
+          backUrl: backBlob.url,
         }),
       });
-
+  
       if (!response.ok) {
         throw new Error("Failed to submit KYC details.");
       }
-
+  
       setSuccessMessage("KYC details submitted successfully.");
     } catch (err) {
       setError("Failed to upload files. Please try again.");
@@ -68,7 +73,7 @@ const KycPage = () => {
       setLoading(false);
     }
   };
-
+  
   return (
     <div className="w-full max-w-lg mx-auto bg-stone-900 p-6 rounded-lg shadow-lg">
       <h2 className="text-2xl font-semibold text-white mb-4">KYC Upload</h2>
