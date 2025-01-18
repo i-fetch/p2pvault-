@@ -9,6 +9,13 @@ const KycPage = () => {
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
 
+  // Function to initialize Vercel Blob client with the API key
+  const configureVercelBlob = () => {
+    upload.configure({
+      apiKey: process.env.NEXT_PUBLIC_VERCEL_BLOB_API_KEY, // Set your Vercel Blob API key here
+    });
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
@@ -31,18 +38,23 @@ const KycPage = () => {
         return;
       }
 
-      // Upload the front image directly to Vercel Blob
+      // Initialize the Vercel Blob client (Ensure it's done before upload)
+      configureVercelBlob();
+
+      // Upload the front image via Vercel Blob
       const frontBlob = await upload(frontFile.name, frontFile, {
-        access: "public", // Adjust the access as needed (public/private)
+        access: "public", // Set the file access to public
       });
+
       if (!frontBlob || !frontBlob.url) {
         throw new Error("Failed to upload front image.");
       }
 
-      // Upload the back image directly to Vercel Blob
+      // Upload the back image via Vercel Blob
       const backBlob = await upload(backFile.name, backFile, {
-        access: "public", // Adjust the access as needed (public/private)
+        access: "public", // Set the file access to public
       });
+
       if (!backBlob || !backBlob.url) {
         throw new Error("Failed to upload back image.");
       }
