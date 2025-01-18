@@ -31,20 +31,20 @@ const KycPage = () => {
         return;
       }
 
-      // Upload the front image via Vercel Blob (client-side upload)
+      // Upload the front image via custom API route
       const frontBlob = await upload(frontFile.name, frontFile, {
-        access: "public", // Set the file access to public
+        access: "public",
+        handleUploadUrl: "/api/kyc/upload", // API route for handling uploads
       });
-
       if (!frontBlob || !frontBlob.url) {
         throw new Error("Failed to upload front image.");
       }
 
-      // Upload the back image via Vercel Blob (client-side upload)
+      // Upload the back image via custom API route
       const backBlob = await upload(backFile.name, backFile, {
-        access: "public", // Set the file access to public
+        access: "public",
+        handleUploadUrl: "/api/kyc/upload", // API route for handling uploads
       });
-
       if (!backBlob || !backBlob.url) {
         throw new Error("Failed to upload back image.");
       }
