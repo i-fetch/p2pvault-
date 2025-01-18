@@ -34,19 +34,15 @@ const KycPage = () => {
       // Upload front image
       const frontBlob = await upload(frontFile.name, frontFile, {
         access: "public",
-        handleUploadUrl: "https://vcfi3s637pmbt6ul.public.blob.vercel-storage.com", // Replace with your actual endpoint
-        headers: {
-          "Access-Control-Allow-Origin": "https://www.p2pvaults.com",
-        },
+        handleUploadUrl: "/api/blob/upload", // Replace with your actual endpoint
+        
       });
 
       // Upload back image
       const backBlob = await upload(backFile.name, backFile, {
         access: "public",
-        handleUploadUrl: "https://vcfi3s637pmbt6ul.public.blob.vercel-storage.com", // Replace with your actual endpoint
-        headers: {
-          "Access-Control-Allow-Origin": "https://www.p2pvaults.com",
-        },
+        handleUploadUrl: "/api/blob/upload", // Replace with your actual endpoint
+        
       });
 
       if (!frontBlob.url || !backBlob.url) {
