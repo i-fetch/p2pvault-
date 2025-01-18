@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import { upload } from "@vercel/blob/client";
 
 const KycPage = () => {
-  const [idType, setIdType] = useState(""); // Dropdown selection
+  const [idType, setIdType] = useState("");
   const frontFileRef = useRef(null);
   const backFileRef = useRef(null);
   const [loading, setLoading] = useState(false);
@@ -31,19 +31,21 @@ const KycPage = () => {
         return;
       }
 
-      // Upload the front image
-      const frontBlob = await upload(frontFile);
-      if (!frontBlob || !frontBlob.url) {
-        throw new Error("Failed to upload front image.");
+      // Upload front image
+      const frontBlob = await upload(frontFile.name, frontFile, {
+        access: "public",
+      });
+
+      // Upload back image
+      const backBlob = await upload(backFile.name, backFile, {
+        access: "public",
+      });
+
+      if (!frontBlob.url || !backBlob.url) {
+        throw new Error("Failed to upload one or both images.");
       }
 
-      // Upload the back image
-      const backBlob = await upload(backFile);
-      if (!backBlob || !backBlob.url) {
-        throw new Error("Failed to upload back image.");
-      }
-
-      // Save the uploaded URLs and ID type to the database via your backend
+      // Send KYC details to the backend
       const response = await fetch("/api/kyc/submit", {
         method: "POST",
         headers: {
@@ -62,7 +64,7 @@ const KycPage = () => {
 
       setSuccessMessage("KYC details submitted successfully.");
     } catch (err) {
-      setError("Failed to upload files. Please try again.");
+      setError(err.message || "An unexpected error occurred.");
       console.error(err);
     } finally {
       setLoading(false);
@@ -74,12 +76,15 @@ const KycPage = () => {
       <h2 className="text-2xl font-semibold text-white mb-4">KYC Upload</h2>
 
       <form onSubmit={handleSubmit}>
-        {/* Dropdown for ID type */}
-        <label className="block text-white mb-2">Select ID Type</label>
+        <label htmlFor="idType" className="block text-white mb-2">
+          Select ID Type
+        </label>
         <select
+          id="idType"
           value={idType}
           onChange={(e) => setIdType(e.target.value)}
           className="w-full p-2 mb-4 bg-stone-800 text-white rounded"
+          required
         >
           <option value="" disabled>
             -- Select ID Type --
@@ -90,9 +95,11 @@ const KycPage = () => {
           <option value="ssn">Social Security Number</option>
         </select>
 
-        {/* Front image upload */}
-        <label className="block text-white mb-2">Upload Front Image</label>
+        <label htmlFor="frontFile" className="block text-white mb-2">
+          Upload Front Image
+        </label>
         <input
+          id="frontFile"
           type="file"
           ref={frontFileRef}
           accept="image/*"
@@ -100,9 +107,11 @@ const KycPage = () => {
           required
         />
 
-        {/* Back image upload */}
-        <label className="block text-white mb-2">Upload Back Image</label>
+        <label htmlFor="backFile" className="block text-white mb-2">
+          Upload Back Image
+        </label>
         <input
+          id="backFile"
           type="file"
           ref={backFileRef}
           accept="image/*"
@@ -110,7 +119,6 @@ const KycPage = () => {
           required
         />
 
-        {/* Submit button */}
         <button
           type="submit"
           disabled={loading}
