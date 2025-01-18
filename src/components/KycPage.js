@@ -31,24 +31,17 @@ const KycPage = () => {
         return;
       }
 
-      // Ensure the file object is valid
-      if (!(frontFile instanceof File) || !(backFile instanceof File)) {
-        setError("Invalid file upload. Please try again.");
-        setLoading(false);
-        return;
+      // Upload the front image
+      const frontBlob = await upload(frontFile);
+      if (!frontBlob || !frontBlob.url) {
+        throw new Error("Failed to upload front image.");
       }
 
-      // Upload the front image to Vercel Blob
-      const frontBlob = await upload(frontFile.name, frontFile, {
-        access: "public",
-        handleUploadUrl: "/api/kyc/upload",
-      });
-
-      // Upload the back image to Vercel Blob
-      const backBlob = await upload(backFile.name, backFile, {
-        access: "public",
-        handleUploadUrl: "/api/kyc/upload",
-      });
+      // Upload the back image
+      const backBlob = await upload(backFile);
+      if (!backBlob || !backBlob.url) {
+        throw new Error("Failed to upload back image.");
+      }
 
       // Save the uploaded URLs and ID type to the database via your backend
       const response = await fetch("/api/kyc/submit", {
@@ -134,6 +127,3 @@ const KycPage = () => {
 };
 
 export default KycPage;
-
-
- 
