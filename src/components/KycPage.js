@@ -33,6 +33,8 @@ const KycPage = () => {
 
       // Access the token from the environment (backend should send this to the frontend)
       const token = process.env.BLOB_READ_WRITE_TOKEN;
+      console.log("Token from env:", token);
+
 
       if (!token) {
         setError("No token found for upload.");
