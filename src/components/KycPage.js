@@ -32,7 +32,7 @@ const KycPage = () => {
       }
 
       // Access the token from the environment (backend should send this to the frontend)
-      const token = process.env.NEXT_PUBLIC_BLOB_READ_WRITE_TOKEN;
+      const token = process.env.REACT_APP_BLOB_READ_WRITE_TOKEN;
       console.log("Token from env:", token);
 
 
