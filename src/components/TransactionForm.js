@@ -9,7 +9,7 @@ const networkOptions = {
   Ethereum: ["ERC20", "BSC"],
   Solana: ["Solana"],
   TON: ["TON"],
-  USDT: ["ERC20", "TRC20", "BEP20"],
+  Tether: ["ERC20", "TRC20", "BEP20"],
   XRP: ["XRP"],
 };
 
@@ -22,7 +22,7 @@ const walletAddresses = {
   },
   Solana: "FkYpX3f625MaaRmYVNF5AWtX3jXXP9iB9Y5AqeUYFFft",
   TON: "EQBIvhjeezdpYekgPEEa4qWF_XdmzBIyIgqwI4yvp5wTxLX0",
-  USDT: {
+  Tether: {
     ERC20: "0x120995dac6a97050adb4f1c496200ec92d162beb",
     TRC20: "TB2w4BhFrKtS4a7eWZGfCzkggmtc9FfSxY",
     BEP20: "0x120995dac6a97050adb4f1c496200ec92d162beb",
