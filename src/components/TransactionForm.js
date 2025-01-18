@@ -18,22 +18,24 @@ const walletAddresses = {
   Ethereum: {
     ERC20: "0x120995dac6a97050adb4f1c496200ec92d162beb",
     BSC: "0x120995dac6a97050adb4f1c496200ec92d162beb",
-    
   },
   Solana: "FkYpX3f625MaaRmYVNF5AWtX3jXXP9iB9Y5AqeUYFFft",
   TON: "EQBIvhjeezdpYekgPEEa4qWF_XdmzBIyIgqwI4yvp5wTxLX0",
   USDT: {
     ERC20: "0x120995dac6a97050adb4f1c496200ec92d162beb",
     TRC20: "TB2w4BhFrKtS4a7eWZGfCzkggmtc9FfSxY",
-    BEP20: "0xB9b04DcbB64d7B10dB18F44231A1E26392c8c9b5",
+    BEP20: "0x120995dac6a97050adb4f1c496200ec92d162beb",
   },
   XRP: "rKPyUkd7rPVmKY7KKbkMqhq49bYi6Tdd3h",
 };
 
 const getWalletAddress = (coinName, network) => {
-  return walletAddresses[coinName]
-    ? walletAddresses[coinName][network] || walletAddresses[coinName]
-    : "No Address Available";
+  if (!walletAddresses[coinName]) return "No Address Available";
+  const address = walletAddresses[coinName];
+  if (typeof address === "object") {
+    return address[network] || "No Address Available";
+  }
+  return address;
 };
 
 const TransactionForm = ({ userBalances = {}, addTransaction }) => {
@@ -64,7 +66,11 @@ const TransactionForm = ({ userBalances = {}, addTransaction }) => {
     setReceiveNetwork(defaultNetwork);
 
     const address = getWalletAddress(coinName, defaultNetwork);
-    setWalletAddress(address);
+    if (address === "No Address Available") {
+      setError(`No wallet address found for ${coinName} on ${defaultNetwork}`);
+    } else {
+      setWalletAddress(address);
+    }
   }, [coinName]);
 
   const handleBack = () => navigate(-1);
@@ -86,7 +92,6 @@ const TransactionForm = ({ userBalances = {}, addTransaction }) => {
       return;
     }
 
-    // Deduct gas fee and add transaction
     const totalAmount = parseFloat(amount) + gasFee;
     if (totalAmount > balance) {
       setError("Insufficient balance to cover the gas fee.");
@@ -215,7 +220,9 @@ const TransactionForm = ({ userBalances = {}, addTransaction }) => {
               </select>
             </div>
             <div className="text-sm md:text-base text-gray-200 mb-2 break-words w-full max-w-full mx-auto flex items-center justify-between">
-              <span className="truncate" title={walletAddress}>{walletAddress}</span>
+              <span className="truncate" title={walletAddress}>
+                {walletAddress}
+              </span>
               <CopyToClipboard text={walletAddress} onCopy={handleCopy}>
                 <button className="ml-2 px-2 py-1 bg-gray-600 text-white rounded-lg">
                   {isCopied ? <FaClipboardCheck /> : <FaClipboard />}
