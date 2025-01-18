@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { BlobClient } from "@vercel/blob/client"; // Updated import
+import { upload } from "@vercel/blob/client";
 
 const KycPage = () => {
   const [idType, setIdType] = useState(""); // Dropdown selection
@@ -38,22 +38,17 @@ const KycPage = () => {
         return;
       }
 
-      // Create a BlobClient instance
-      const blobClient = new BlobClient();
-
       // Upload the front image to Vercel Blob
-      const frontBlob = await blobClient.upload(frontFile, {
-        access: "public", // Make the file publicly accessible
+      const frontBlob = await upload(frontFile.name, frontFile, {
+        access: "public",
+        handleUploadUrl: "/api/kyc/upload",
       });
 
       // Upload the back image to Vercel Blob
-      const backBlob = await blobClient.upload(backFile, {
-        access: "public", // Make the file publicly accessible
+      const backBlob = await upload(backFile.name, backFile, {
+        access: "public",
+        handleUploadUrl: "/api/kyc/upload",
       });
-
-      // Log the response from Vercel Blob
-      console.log("Front Blob URL:", frontBlob.url);
-      console.log("Back Blob URL:", backBlob.url);
 
       // Save the uploaded URLs and ID type to the database via your backend
       const response = await fetch("/api/kyc/submit", {
@@ -63,8 +58,8 @@ const KycPage = () => {
         },
         body: JSON.stringify({
           idType,
-          frontUrl: frontBlob.url, // Ensure this is a string URL
-          backUrl: backBlob.url,   // Ensure this is a string URL
+          frontUrl: frontBlob.url,
+          backUrl: backBlob.url,
         }),
       });
 
@@ -139,3 +134,6 @@ const KycPage = () => {
 };
 
 export default KycPage;
+
+
+ 
