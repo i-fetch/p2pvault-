@@ -32,7 +32,7 @@ const KycPage = () => {
       }
 
       // Access the token from the environment (backend should send this to the frontend)
-      const token = process.env.NEXT_PUBLIC_VERCEL_BLOB_TOKEN;
+      const token = process.env.VERCEL_BLOB__API_TOKEN;
 
       if (!token) {
         setError("No token found for upload.");
