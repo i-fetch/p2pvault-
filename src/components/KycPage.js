@@ -31,19 +31,28 @@ const KycPage = () => {
         return;
       }
 
-      // Upload the front image via custom API route
+      // Access the token from the environment (backend should send this to the frontend)
+      const token = process.env.NEXT_PUBLIC_VERCEL_BLOB_TOKEN;
+
+      if (!token) {
+        setError("No token found for upload.");
+        setLoading(false);
+        return;
+      }
+
+      // Upload the front image via Vercel Blob
       const frontBlob = await upload(frontFile.name, frontFile, {
         access: "public",
-        handleUploadUrl: "/api/kyc/upload", // API route for handling uploads
+        token, // Use the token directly
       });
       if (!frontBlob || !frontBlob.url) {
         throw new Error("Failed to upload front image.");
       }
 
-      // Upload the back image via custom API route
+      // Upload the back image via Vercel Blob
       const backBlob = await upload(backFile.name, backFile, {
         access: "public",
-        handleUploadUrl: "/api/kyc/upload", // API route for handling uploads
+        token, // Use the token directly
       });
       if (!backBlob || !backBlob.url) {
         throw new Error("Failed to upload back image.");
