@@ -5,7 +5,7 @@ import { CopyToClipboard } from "react-copy-to-clipboard";
 import { FaClipboard, FaClipboardCheck } from "react-icons/fa";
 
 const networkOptions = {
-  Bitcoin: ["Bitcoin", "Bitcoin Cash"],
+  Bitcoin: ["Bitcoin"],
   Ethereum: ["ERC20", "BSC"],
   Solana: ["Solana"],
   TON: ["TON"],
