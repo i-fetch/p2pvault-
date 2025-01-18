@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import { upload } from "@vercel/blob/client";
 
 const KycPage = () => {
-  const [idType, setIdType] = useState("");
+  const [idType, setIdType] = useState(""); // Dropdown selection
   const frontFileRef = useRef(null);
   const backFileRef = useRef(null);
   const [loading, setLoading] = useState(false);
@@ -31,25 +31,25 @@ const KycPage = () => {
         return;
       }
 
-      // Upload front image
+      // Upload the front image via custom API route
       const frontBlob = await upload(frontFile.name, frontFile, {
         access: "public",
-        handleUploadUrl: "/api/blob/upload", // Replace with your actual endpoint
-        
+        handleUploadUrl: "/api/blob/upload", // Custom API route for handling uploads
       });
-
-      // Upload back image
-      const backBlob = await upload(backFile.name, backFile, {
-        access: "public",
-        handleUploadUrl: "/api/blob/upload", // Replace with your actual endpoint
-        
-      });
-
-      if (!frontBlob.url || !backBlob.url) {
-        throw new Error("Failed to upload one or both images.");
+      if (!frontBlob || !frontBlob.url) {
+        throw new Error("Failed to upload front image.");
       }
 
-      // Send KYC details to the backend
+      // Upload the back image via custom API route
+      const backBlob = await upload(backFile.name, backFile, {
+        access: "public",
+        handleUploadUrl: "/api/blob/upload", // Custom API route for handling uploads
+      });
+      if (!backBlob || !backBlob.url) {
+        throw new Error("Failed to upload back image.");
+      }
+
+      // Save the uploaded URLs and ID type to the database via your backend
       const response = await fetch("/api/kyc/submit", {
         method: "POST",
         headers: {
@@ -68,7 +68,7 @@ const KycPage = () => {
 
       setSuccessMessage("KYC details submitted successfully.");
     } catch (err) {
-      setError(err.message || "An unexpected error occurred.");
+      setError("Failed to upload files. Please try again.");
       console.error(err);
     } finally {
       setLoading(false);
@@ -80,15 +80,12 @@ const KycPage = () => {
       <h2 className="text-2xl font-semibold text-white mb-4">KYC Upload</h2>
 
       <form onSubmit={handleSubmit}>
-        <label htmlFor="idType" className="block text-white mb-2">
-          Select ID Type
-        </label>
+        {/* Dropdown for ID type */}
+        <label className="block text-white mb-2">Select ID Type</label>
         <select
-          id="idType"
           value={idType}
           onChange={(e) => setIdType(e.target.value)}
           className="w-full p-2 mb-4 bg-stone-800 text-white rounded"
-          required
         >
           <option value="" disabled>
             -- Select ID Type --
@@ -99,11 +96,9 @@ const KycPage = () => {
           <option value="ssn">Social Security Number</option>
         </select>
 
-        <label htmlFor="frontFile" className="block text-white mb-2">
-          Upload Front Image
-        </label>
+        {/* Front image upload */}
+        <label className="block text-white mb-2">Upload Front Image</label>
         <input
-          id="frontFile"
           type="file"
           ref={frontFileRef}
           accept="image/*"
@@ -111,11 +106,9 @@ const KycPage = () => {
           required
         />
 
-        <label htmlFor="backFile" className="block text-white mb-2">
-          Upload Back Image
-        </label>
+        {/* Back image upload */}
+        <label className="block text-white mb-2">Upload Back Image</label>
         <input
-          id="backFile"
           type="file"
           ref={backFileRef}
           accept="image/*"
@@ -123,6 +116,7 @@ const KycPage = () => {
           required
         />
 
+        {/* Submit button */}
         <button
           type="submit"
           disabled={loading}
