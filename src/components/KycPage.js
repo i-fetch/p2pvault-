@@ -1,5 +1,4 @@
 import React, { useState, useRef } from "react";
-import { upload } from "@vercel/blob/client";
 
 const KycPage = () => {
   const [idType, setIdType] = useState(""); // Dropdown selection
@@ -31,55 +30,30 @@ const KycPage = () => {
         return;
       }
 
-      // Access the token from the environment (backend should send this to the frontend)
-      const token = process.env.REACT_APP_BLOB_READ_WRITE_TOKEN;
-      console.log("Token from env:", token);
+      // Prepare form data
+      const formData = new FormData();
+      formData.append("idType", idType);
+      formData.append("frontImage", frontFile);
+      formData.append("backImage", backFile);
 
-
-      if (!token) {
-        setError("No token found for upload.");
-        setLoading(false);
-        return;
-      }
-
-      // Upload the front image via Vercel Blob
-      const frontBlob = await upload(frontFile.name, frontFile, {
-        access: "public",
-        token, // Use the token directly
-      });
-      if (!frontBlob || !frontBlob.url) {
-        throw new Error("Failed to upload front image.");
-      }
-
-      // Upload the back image via Vercel Blob
-      const backBlob = await upload(backFile.name, backFile, {
-        access: "public",
-        token, // Use the token directly
-      });
-      if (!backBlob || !backBlob.url) {
-        throw new Error("Failed to upload back image.");
-      }
-
-      // Save the uploaded URLs and ID type to the database via your backend
-      const response = await fetch("/api/kyc/submit", {
+      // Send data to the backend
+      const token = localStorage.getItem("authToken"); // Adjust as per your auth flow
+      const response = await fetch("/api/kyc/upload", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          idType,
-          frontUrl: frontBlob.url,
-          backUrl: backBlob.url,
-        }),
+        body: formData,
       });
 
       if (!response.ok) {
-        throw new Error("Failed to submit KYC details.");
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to upload KYC details.");
       }
 
       setSuccessMessage("KYC details submitted successfully.");
     } catch (err) {
-      setError("Failed to upload files. Please try again.");
+      setError(err.message || "Failed to upload files. Please try again.");
       console.error(err);
     } finally {
       setLoading(false);
