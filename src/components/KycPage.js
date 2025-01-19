@@ -8,8 +8,7 @@ const KycPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
-  const API_URL =process.env.REACT_APP_API_URL2;
-
+  const API_URL = process.env.REACT_APP_API_URL; // Make sure this is set in your .env file
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -33,16 +32,10 @@ const KycPage = () => {
         return;
       }
 
-     
-      
-
-
-     
-
       // Upload the front image via Vercel Blob
       const frontBlob = await upload(frontFile.name, frontFile, {
         access: "public",
-        handleUploadUrl:`${API_URL}/api/blob/upload`
+        handleUploadUrl: `${API_URL}/api/blob/upload`, // Backend upload URL
       });
       if (!frontBlob || !frontBlob.url) {
         throw new Error("Failed to upload front image.");
@@ -51,15 +44,14 @@ const KycPage = () => {
       // Upload the back image via Vercel Blob
       const backBlob = await upload(backFile.name, backFile, {
         access: "public",
-        handleUploadUrl:`${API_URL}/api/blob/upload`
-
+        handleUploadUrl: `${API_URL}/api/blob/upload`, // Backend upload URL
       });
       if (!backBlob || !backBlob.url) {
         throw new Error("Failed to upload back image.");
       }
 
       // Save the uploaded URLs and ID type to the database via your backend
-      const response = await fetch("${API_URL}/api/kyc/submit", {
+      const response = await fetch(`${API_URL}/api/kyc/submit`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
