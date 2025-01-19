@@ -37,11 +37,7 @@ const KycPage = () => {
       
 
 
-      if (!token) {
-        setError("No token found for upload.");
-        setLoading(false);
-        return;
-      }
+     
 
       // Upload the front image via Vercel Blob
       const frontBlob = await upload(frontFile.name, frontFile, {
