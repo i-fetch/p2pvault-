@@ -15,68 +15,55 @@ const KycPage = () => {
     setLoading(true);
     setError(null);
     setSuccessMessage("");
-
+  
     if (!idType) {
       setError("Please select an ID type.");
       setLoading(false);
       return;
     }
-
+  
     try {
       const frontFile = frontFileRef.current.files[0];
       const backFile = backFileRef.current.files[0];
-
+  
       if (!frontFile || !backFile) {
         setError("Both front and back images are required.");
         setLoading(false);
         return;
       }
-
-      // Prepare FormData for the front image
-      const frontFormData = new FormData();
-      frontFormData.append("file", frontFile);
-      // frontFormData.append("clientToken", VERCELOB_TOKEN);
-
-      // Prepare FormData for the back image
-      const backFormData = new FormData();
-      backFormData.append("file", backFile);
-      // backFormData.append("clientToken", VERCELOB_TOKEN);
-
+  
       // Upload the front image via Vercel Blob
-      const frontResponse = await fetch(`${API_URL}/api/blob/upload`, {
-        method: "POST",
-        body: frontFormData,
+      const frontBlob = await upload(frontFile.name, frontFile, {
+        access: "public",
+        handleUploadUrl: `${API_URL}/api/blob/upload`, // Backend upload URL
+        clientToken: VERCELOB_TOKEN,
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`, // Make sure token is sent
+        },
       });
-      const frontBlob = await frontResponse.json();
-
       if (!frontBlob || !frontBlob.url) {
         throw new Error("Failed to upload front image.");
       }
-
+  
       // Upload the back image via Vercel Blob
-      const backResponse = await fetch(`${API_URL}/api/blob/upload`, {
-        method: "POST",
-        body: backFormData,
+      const backBlob = await upload(backFile.name, backFile, {
+        access: "public",
+        handleUploadUrl: `${API_URL}/api/blob/upload`, // Backend upload URL
+        clientToken: VERCELOB_TOKEN,
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`, // Make sure token is sent
+        },
       });
-      const backBlob = await backResponse.json();
-
       if (!backBlob || !backBlob.url) {
         throw new Error("Failed to upload back image.");
       }
-
-      // Get the token from localStorage
-      const token = localStorage.getItem("token"); // Ensure the token is stored during login
-
-      if (!token) {
-        throw new Error("Token is missing. Please log in again.");
-      }
-
+  
       // Save the uploaded URLs and ID type to the database via your backend
       const response = await fetch(`${API_URL}/api/kyc/submit`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Pass the token in the Authorization header
+          Authorization: `Bearer ${localStorage.getItem("token")}`, // Pass user token for authentication
         },
         body: JSON.stringify({
           idType,
@@ -84,12 +71,12 @@ const KycPage = () => {
           backUrl: backBlob.url,
         }),
       });
-
+  
       if (!response.ok) {
         const { error } = await response.json();
         throw new Error(error || "Failed to submit KYC details.");
       }
-
+  
       setSuccessMessage("KYC details submitted successfully.");
     } catch (err) {
       setError(err.message || "Failed to upload files. Please try again.");
@@ -98,6 +85,7 @@ const KycPage = () => {
       setLoading(false);
     }
   };
+  
 
   return (
     <div className="w-full max-w-lg mx-auto bg-stone-900 p-6 rounded-lg shadow-lg">
