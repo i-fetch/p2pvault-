@@ -8,7 +8,7 @@ const KycPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
-  const API_URL = process.env.REACT_APP_API_URL; // Ensure this is set in your .env file
+  const API_URL = process.env.REACT_APP_API_URL2; // Ensure this is set in your .env file
 
   const handleSubmit = async (event) => {
     event.preventDefault();
