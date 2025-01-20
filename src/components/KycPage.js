@@ -37,7 +37,7 @@ const KycPage = () => {
       const frontBlob = await upload(frontFile.name, frontFile, {
         access: "public",
         handleUploadUrl: `${API_URL}/api/blob/upload`, // Backend upload URL
-        Content-Type: multipart/form-data;
+        Content-Type: multipart/form-data,
         
       });
       if (!frontBlob || !frontBlob.url) {
@@ -48,7 +48,7 @@ const KycPage = () => {
       const backBlob = await upload(backFile.name, backFile, {
         access: "public",
         handleUploadUrl: `${API_URL}/api/blob/upload`, // Backend upload URL
-        Content-Type: multipart/form-data;
+        Content-Type: multipart/form-data,
     
       });
       if (!backBlob || !backBlob.url) {
