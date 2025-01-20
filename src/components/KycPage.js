@@ -11,7 +11,6 @@ const KycPage = () => {
   const API_URL = process.env.REACT_APP_API_URL2; // Ensure this is set in your .env file
   const VERCELOB_TOKEN = process.env.REACT_APP_VERCEL_BLOB_READ_WIRTE_TOKEN; // Ensure this matches your .env file
 
-
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
