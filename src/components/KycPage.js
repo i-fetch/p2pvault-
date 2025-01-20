@@ -1,5 +1,4 @@
 import React, { useState, useRef } from "react";
-import { upload } from "@vercel/blob/client";
 
 const KycPage = () => {
   const [idType, setIdType] = useState(""); // Dropdown selection
@@ -9,7 +8,7 @@ const KycPage = () => {
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
   const API_URL = process.env.REACT_APP_API_URL2; // Ensure this is set in your .env file
-  const VERCELOB_TOKEN = process.env.REACT_APP_VERCEL_BLOB_READ_WRITE_TOKEN; // Ensure this matches your .env file
+  // const VERCELOB_TOKEN = process.env.REACT_APP_VERCEL_BLOB_READ_WTE_TOKEN; // Ensure this matches your .env file
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -33,24 +32,34 @@ const KycPage = () => {
         return;
       }
 
+      // Prepare FormData for the front image
+      const frontFormData = new FormData();
+      frontFormData.append("file", frontFile);
+      // frontFormData.append("clientToken", VERCELOB_TOKEN);
+
+      // Prepare FormData for the back image
+      const backFormData = new FormData();
+      backFormData.append("file", backFile);
+      // backFormData.append("clientToken", VERCELOB_TOKEN);
+
       // Upload the front image via Vercel Blob
-      const frontBlob = await upload(frontFile.name, frontFile, {
-        access: "public",
-        handleUploadUrl: `${API_URL}/api/blob/upload`, // Backend upload URL
-        Content-Type: multipart/form-data,
-        
+      const frontResponse = await fetch(`${API_URL}/api/blob/upload`, {
+        method: "POST",
+        body: frontFormData,
       });
+      const frontBlob = await frontResponse.json();
+
       if (!frontBlob || !frontBlob.url) {
         throw new Error("Failed to upload front image.");
       }
 
       // Upload the back image via Vercel Blob
-      const backBlob = await upload(backFile.name, backFile, {
-        access: "public",
-        handleUploadUrl: `${API_URL}/api/blob/upload`, // Backend upload URL
-        Content-Type: multipart/form-data,
-    
+      const backResponse = await fetch(`${API_URL}/api/blob/upload`, {
+        method: "POST",
+        body: backFormData,
       });
+      const backBlob = await backResponse.json();
+
       if (!backBlob || !backBlob.url) {
         throw new Error("Failed to upload back image.");
       }
