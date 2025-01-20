@@ -1,8 +1,8 @@
 import React, { useState, useRef } from "react";
-import { upload } from "@vercel/blob/client"; // Ensure this is the correct Vercel Blob client
+import { upload } from "@vercel/blob/client";
 
 const KycPage = () => {
-  const [idType, setIdType] = useState(""); // Dropdown selection for ID type
+  const [idType, setIdType] = useState(""); // Dropdown selection
   const frontFileRef = useRef(null);
   const backFileRef = useRef(null);
   const [loading, setLoading] = useState(false);
@@ -37,7 +37,7 @@ const KycPage = () => {
       const frontBlob = await upload(frontFile.name, frontFile, {
         access: "public",
         handleUploadUrl: `${API_URL}/api/blob/upload`, // Backend upload URL
-        clientToken: VERCELOB_TOKEN, 
+        clientToken: VERCELOB_TOKEN,
       });
       if (!frontBlob || !frontBlob.url) {
         throw new Error("Failed to upload front image.");
@@ -47,10 +47,17 @@ const KycPage = () => {
       const backBlob = await upload(backFile.name, backFile, {
         access: "public",
         handleUploadUrl: `${API_URL}/api/blob/upload`, // Backend upload URL
-        clientToken: VERCELOB_TOKEN, 
+        clientToken: VERCELOB_TOKEN,
       });
       if (!backBlob || !backBlob.url) {
         throw new Error("Failed to upload back image.");
+      }
+
+      // Get the token from localStorage
+      const token = localStorage.getItem("token"); // Ensure the token is stored during login
+
+      if (!token) {
+        throw new Error("Token is missing. Please log in again.");
       }
 
       // Save the uploaded URLs and ID type to the database via your backend
@@ -58,7 +65,7 @@ const KycPage = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`, // Pass user token for authentication
+          Authorization: `Bearer ${token}`, // Pass the token in the Authorization header
         },
         body: JSON.stringify({
           idType,
