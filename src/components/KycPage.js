@@ -37,7 +37,8 @@ const KycPage = () => {
       const frontBlob = await upload(frontFile.name, frontFile, {
         access: "public",
         handleUploadUrl: `${API_URL}/api/blob/upload`, // Backend upload URL
-        // clientToken: VERCELOB_TOKEN,
+        Content-Type: multipart/form-data;
+        
       });
       if (!frontBlob || !frontBlob.url) {
         throw new Error("Failed to upload front image.");
@@ -47,7 +48,8 @@ const KycPage = () => {
       const backBlob = await upload(backFile.name, backFile, {
         access: "public",
         handleUploadUrl: `${API_URL}/api/blob/upload`, // Backend upload URL
-        // clientToken: VERCELOB_TOKEN,
+        Content-Type: multipart/form-data;
+    
       });
       if (!backBlob || !backBlob.url) {
         throw new Error("Failed to upload back image.");
