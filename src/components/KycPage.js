@@ -36,7 +36,7 @@ const KycPage = () => {
       const frontBlob = await upload(frontFile.name, frontFile, {
         access: "public",
         handleUploadUrl: `${API_URL}/api/blob/upload`, // Backend upload URL
-        clientToken: VERCELOB_TOKEN,
+        // clientToken: VERCELOB_TOKEN,
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`, // Make sure token is sent
         },
@@ -49,7 +49,7 @@ const KycPage = () => {
       const backBlob = await upload(backFile.name, backFile, {
         access: "public",
         handleUploadUrl: `${API_URL}/api/blob/upload`, // Backend upload URL
-        clientToken: VERCELOB_TOKEN,
+        // clientToken: VERCELOB_TOKEN,
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`, // Make sure token is sent
         },
