@@ -8,7 +8,7 @@ const KycPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
-  const API_URL = process.env.REACT_APP_API_URL; // Make sure this is set in your .env file
+  const API_URL = process.env.REACT_APP_API_URL; // Ensure this is set in your .env file
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -55,6 +55,7 @@ const KycPage = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`, // Pass user token for authentication
         },
         body: JSON.stringify({
           idType,
@@ -64,12 +65,13 @@ const KycPage = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to submit KYC details.");
+        const { error } = await response.json();
+        throw new Error(error || "Failed to submit KYC details.");
       }
 
       setSuccessMessage("KYC details submitted successfully.");
     } catch (err) {
-      setError("Failed to upload files. Please try again.");
+      setError(err.message || "Failed to upload files. Please try again.");
       console.error(err);
     } finally {
       setLoading(false);
