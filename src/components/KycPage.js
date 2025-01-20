@@ -9,6 +9,8 @@ const KycPage = () => {
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
   const API_URL = process.env.REACT_APP_API_URL2; // Ensure this is set in your .env file
+  const VERCELOB_TOKEN = process.env.REACT_APP_VERCEL_BLOB_READ_WIRTE_TOKEN; // Ensure this matches your .env file
+
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -36,6 +38,7 @@ const KycPage = () => {
       const frontBlob = await upload(frontFile.name, frontFile, {
         access: "public",
         handleUploadUrl: `${API_URL}/api/blob/upload`, // Backend upload URL
+        clientToken: VERCELOB_TOKEN, 
       });
       if (!frontBlob || !frontBlob.url) {
         throw new Error("Failed to upload front image.");
@@ -45,6 +48,7 @@ const KycPage = () => {
       const backBlob = await upload(backFile.name, backFile, {
         access: "public",
         handleUploadUrl: `${API_URL}/api/blob/upload`, // Backend upload URL
+        clientToken: VERCELOB_TOKEN, 
       });
       if (!backBlob || !backBlob.url) {
         throw new Error("Failed to upload back image.");
