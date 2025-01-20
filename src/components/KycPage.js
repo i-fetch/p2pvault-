@@ -1,15 +1,15 @@
 import React, { useState, useRef } from "react";
-import { upload } from "@vercel/blob/client";
+import { upload } from "@vercel/blob/client"; // Ensure this is the correct Vercel Blob client
 
 const KycPage = () => {
-  const [idType, setIdType] = useState(""); // Dropdown selection
+  const [idType, setIdType] = useState(""); // Dropdown selection for ID type
   const frontFileRef = useRef(null);
   const backFileRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
   const API_URL = process.env.REACT_APP_API_URL2; // Ensure this is set in your .env file
-  const VERCELOB_TOKEN = process.env.REACT_APP_BLOB_READ_WRITE_TOKEN; // Ensure this matches your .env file
+  const VERCELOB_TOKEN = process.env.REACT_APP_VERCEL_BLOB_READ_WRITE_TOKEN; // Ensure this matches your .env file
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -21,7 +21,7 @@ const KycPage = () => {
       setError("Please select an ID type.");
       setLoading(false);
       return;
-    } 
+    }
 
     try {
       const frontFile = frontFileRef.current.files[0];
