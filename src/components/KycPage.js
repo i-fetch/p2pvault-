@@ -1,152 +1,139 @@
-
 import React, { useState, useRef } from "react";
 import { upload } from "@vercel/blob/client";
 
 const KycPage = () => {
-  const [idType, setIdType] = useState(""); // Dropdown selection
-  const frontFileRef = useRef(null);
-  const backFileRef = useRef(null);
+  const [idType, setIdType] = useState("");
+  const [frontBlobUrl, setFrontBlobUrl] = useState(null);
+  const [backBlobUrl, setBackBlobUrl] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [successMessage, setSuccessMessage] = useState("");
-  const API_URL = process.env.REACT_APP_API_URL2; // Ensure this is set in your .env file
-  const VERCELOB_TOKEN = process.env.REACT_APP_VERCEL_BLOB_READ_WRITE_TOKEN; // Ensure this matches your .env file
+  const [success, setSuccess] = useState(false);
+  const frontFileRef = useRef(null);
+  const backFileRef = useRef(null);
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const handleUpload = async (file) => {
+    try {
+      const blob = await upload(file.name, file, {
+        access: "public",
+      });
+      return blob.url;
+    } catch (err) {
+      throw new Error("File upload failed: " + err.message);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     setLoading(true);
     setError(null);
-    setSuccessMessage("");
-  
+    setSuccess(false);
+
     if (!idType) {
       setError("Please select an ID type.");
       setLoading(false);
       return;
     }
-  
+
     try {
       const frontFile = frontFileRef.current.files[0];
       const backFile = backFileRef.current.files[0];
-  
+
       if (!frontFile || !backFile) {
         setError("Both front and back images are required.");
         setLoading(false);
         return;
       }
-  
-      // Ensure files are uploaded correctly
-      const frontFormData = new FormData();
-      frontFormData.append("file", frontFile);
-  
-      const backFormData = new FormData();
-      backFormData.append("file", backFile);
-  
-      // Upload the front image via Vercel Blob
-      const frontUploadResponse = await fetch("/api/kyc/upload", {
-        method: "POST",
-        body: frontFormData,
-      });
-  
-      if (!frontUploadResponse.ok) {
-        throw new Error("Failed to upload front image.");
-      }
-  
-      const frontBlob = await frontUploadResponse.json();
-  
-      // Upload the back image via Vercel Blob
-      const backUploadResponse = await fetch("/api/kyc/upload", {
-        method: "POST",
-        body: backFormData,
-      });
-  
-      if (!backUploadResponse.ok) {
-        throw new Error("Failed to upload back image.");
-      }
-  
-      const backBlob = await backUploadResponse.json();
-  
-      // Save the uploaded URLs and ID type to the database via your backend
-      const response = await fetch(`${API_URL}/api/kyc/submit`, {
+
+      // Upload front and back images
+      const frontUrl = await handleUpload(frontFile);
+      const backUrl = await handleUpload(backFile);
+
+      setFrontBlobUrl(frontUrl);
+      setBackBlobUrl(backUrl);
+
+      // Send data to backend
+      const response = await fetch("/api/kyc/submit", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`, // Pass user token for authentication
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: JSON.stringify({
           idType,
-          frontUrl: frontBlob.url,
-          backUrl: backBlob.url,
+          frontUrl,
+          backUrl,
         }),
       });
-  
+
       if (!response.ok) {
         const { error } = await response.json();
         throw new Error(error || "Failed to submit KYC details.");
       }
-  
-      setSuccessMessage("KYC details submitted successfully.");
+
+      setSuccess(true);
     } catch (err) {
-      setError(err.message || "Failed to upload files. Please try again.");
-      console.error(err);
+      setError(err.message || "Failed to submit KYC details.");
     } finally {
       setLoading(false);
     }
   };
-  
-  
+
   return (
-    <div className="w-full max-w-lg mx-auto bg-stone-900 p-6 rounded-lg shadow-lg">
-      <h2 className="text-2xl font-semibold text-white mb-4">KYC Upload</h2>
-
-      <form onSubmit={handleSubmit}>
-        {/* Dropdown for ID type */}
-        <label className="block text-white mb-2">Select ID Type</label>
-        <select
-          value={idType}
-          onChange={(e) => setIdType(e.target.value)}
-          className="w-full p-2 mb-4 bg-stone-800 text-white rounded"
-        >
-          <option value="" disabled>
-            -- Select ID Type --
-          </option>
-          <option value="passport">Passport</option>
-          <option value="driver_license">Driver's License</option>
-          <option value="national_id">National ID</option>
-          <option value="ssn">Social Security Number</option>
-        </select>
-
-        {/* Front image upload */}
-        <label className="block text-white mb-2">Upload Front Image</label>
-        <input
-          type="file"
-          ref={frontFileRef}
-          accept="image/*"
-          className="w-full p-2 mb-4 bg-stone-800 text-white rounded"
-          required
-        />
-
-        {/* Back image upload */}
-        <label className="block text-white mb-2">Upload Back Image</label>
-        <input
-          type="file"
-          ref={backFileRef}
-          accept="image/*"
-          className="w-full p-2 mb-4 bg-stone-800 text-white rounded"
-          required
-        />
-
-        {/* Submit button */}
+    <div className="max-w-lg mx-auto bg-stone-900 text-white p-6 rounded-lg">
+      <h1 className="text-2xl font-bold mb-4">KYC Verification</h1>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="idType" className="block mb-2">
+            Select ID Type
+          </label>
+          <select
+            id="idType"
+            value={idType}
+            onChange={(e) => setIdType(e.target.value)}
+            className="w-full bg-stone-800 text-white rounded p-2"
+          >
+            <option value="">-- Select ID Type --</option>
+            <option value="passport">Passport</option>
+            <option value="driver_license">Driver's License</option>
+            <option value="national_id">National ID</option>
+          </select>
+        </div>
+        <div>
+          <label htmlFor="frontFile" className="block mb-2">
+            Upload Front Image
+          </label>
+          <input
+            type="file"
+            id="frontFile"
+            ref={frontFileRef}
+            accept="image/*"
+            className="block w-full bg-stone-800 text-white rounded p-2"
+          />
+        </div>
+        <div>
+          <label htmlFor="backFile" className="block mb-2">
+            Upload Back Image
+          </label>
+          <input
+            type="file"
+            id="backFile"
+            ref={backFileRef}
+            accept="image/*"
+            className="block w-full bg-stone-800 text-white rounded p-2"
+          />
+        </div>
         <button
           type="submit"
           disabled={loading}
-          className={`w-full py-2 rounded-md text-white ${loading ? "bg-gray-800" : "bg-pink-600"}`}
+          className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 disabled:opacity-50"
         >
-          {loading ? "Uploading..." : "Submit"}
+          {loading ? "Submitting..." : "Submit KYC"}
         </button>
       </form>
-
-      {error && <p className="text-red-400 mt-4">{error}</p>}
-      {successMessage && <p className="text-green-400 mt-4">{successMessage}</p>}
+      {error && <p className="text-red-500 mt-4">{error}</p>}
+      {success && (
+        <p className="text-green-500 mt-4">KYC submitted successfully!</p>
+      )}
     </div>
   );
 };
