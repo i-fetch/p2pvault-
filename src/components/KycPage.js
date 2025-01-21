@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from "react";
 import { upload } from "@vercel/blob/client";
 
@@ -36,7 +37,9 @@ const KycPage = () => {
       // Upload the front image via Vercel Blob
       const frontBlob = await upload(frontFile, {
         access: "public",
-        token: VERCELOB_TOKEN,
+        handleUploadUrl: `/api/kyc/upload`,
+
+        
       });
 
       if (!frontBlob || !frontBlob.url) {
@@ -46,7 +49,8 @@ const KycPage = () => {
       // Upload the back image via Vercel Blob
       const backBlob = await upload(backFile, {
         access: "public",
-        token: VERCELOB_TOKEN,
+        handleUploadUrl: `/api/kyc/upload`,
+        
       });
 
       if (!backBlob || !backBlob.url) {
