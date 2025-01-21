@@ -45,12 +45,12 @@ const KycPage = () => {
       }
 
       // Upload front and back images
-      const frontUrl = await handleUpload(frontFile.name, frontFile,{
+      const frontUrl = await upload(frontFile.name, frontFile,{
         access:'public',
       });
-      const backUrl = await handleUpload(backFile.name, backFile,{
+      const backUrl = await upload(backFile.name, backFile,{
         access:'public',
-        
+
       });
 
       setFrontBlobUrl(frontUrl);
