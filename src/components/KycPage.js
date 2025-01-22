@@ -1,21 +1,53 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 const KycPage = () => {
   const [idType, setIdType] = useState("");
-  const [frontBlob, setFrontBlob] = useState(null);
-  const [backBlob, setBackBlob] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+  const [kycStatus, setKycStatus] = useState("loading"); // KYC status: "not_verified", "pending", "approved", "rejected", "loading"
   const frontFileRef = useRef(null);
   const backFileRef = useRef(null);
   const API_URL = process.env.REACT_APP_API_URL2;
 
+  // Fetch KYC status when the component loads
+  useEffect(() => {
+    const fetchKycStatus = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/kyc/status`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch KYC status.");
+        }
+
+        const data = await response.json();
+        setKycStatus(data.status);
+      } catch (error) {
+        console.error(error.message);
+        setKycStatus("error");
+      }
+    };
+
+    fetchKycStatus();
+  }, [API_URL]);
+
+  // Handle KYC submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     setSuccess(false);
+
+    if (kycStatus === "approved") {
+      setError("Your KYC is already verified. No further action is required.");
+      setLoading(false);
+      return;
+    }
 
     if (!idType) {
       setError("Please select an ID type.");
@@ -74,6 +106,7 @@ const KycPage = () => {
       }
 
       setSuccess(true);
+      setKycStatus("pending"); // Update the status locally after submission
     } catch (err) {
       setError(err.message || "Failed to submit KYC details.");
     } finally {
@@ -81,71 +114,103 @@ const KycPage = () => {
     }
   };
 
+  const getStatusMessage = () => {
+    switch (kycStatus) {
+      case "not_verified":
+        return "Not Verified";
+      case "pending":
+        return "Pending Verification";
+      case "approved":
+        return "Verified";
+      case "rejected":
+        return "Rejected. Please contact support.";
+      default:
+        return "Loading status...";
+    }
+  };
+
+  const getStatusColor = () => {
+    switch (kycStatus) {
+      case "not_verified":
+        return "text-red-500";
+      case "pending":
+        return "text-yellow-500";
+      case "approved":
+        return "text-green-500";
+      case "rejected":
+        return "text-red-500";
+      default:
+        return "text-gray-500";
+    }
+  };
+
   return (
     <div className="max-w-lg mx-auto bg-stone-900 text-white p-6 rounded-lg">
       <h1 className="text-2xl font-bold mb-4">KYC Verification</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="idType" className="block mb-2">
-            Select ID Type
-          </label>
-          <select
-            id="idType"
-            value={idType}
-            onChange={(e) => setIdType(e.target.value)}
-            className="w-full bg-stone-800 text-white rounded p-2"
+
+      {/* Display KYC Status */}
+      <div className="mb-4">
+        <p className={`text-lg font-semibold ${getStatusColor()}`}>
+          KYC Status: {getStatusMessage()}
+        </p>
+      </div>
+
+      {/* Disable form if KYC is already approved */}
+      {kycStatus !== "approved" && (
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="idType" className="block mb-2">
+              Select ID Type
+            </label>
+            <select
+              id="idType"
+              value={idType}
+              onChange={(e) => setIdType(e.target.value)}
+              className="w-full bg-stone-800 text-white rounded p-2"
+            >
+              <option value="">-- Select ID Type --</option>
+              <option value="passport">Passport</option>
+              <option value="driver_license">Driver's License</option>
+              <option value="national_id">National ID</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="frontFile" className="block mb-2">
+              Upload Front Image
+            </label>
+            <input
+              type="file"
+              id="frontFile"
+              ref={frontFileRef}
+              accept="image/*"
+              className="block w-full bg-stone-800 text-white rounded p-2"
+            />
+          </div>
+          <div>
+            <label htmlFor="backFile" className="block mb-2">
+              Upload Back Image
+            </label>
+            <input
+              type="file"
+              id="backFile"
+              ref={backFileRef}
+              accept="image/*"
+              className="block w-full bg-stone-800 text-white rounded p-2"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 disabled:opacity-50"
           >
-            <option value="">-- Select ID Type --</option>
-            <option value="passport">Passport</option>
-            <option value="driver_license">Driver's License</option>
-            <option value="national_id">National ID</option>
-          </select>
-        </div>
-        <div>
-          <label htmlFor="frontFile" className="block mb-2">
-            Upload Front Image
-          </label>
-          <input
-            type="file"
-            id="frontFile"
-            ref={frontFileRef}
-            accept="image/*"
-            className="block w-full bg-stone-800 text-white rounded p-2"
-          />
-        </div>
-        <div>
-          <label htmlFor="backFile" className="block mb-2">
-            Upload Back Image
-          </label>
-          <input
-            type="file"
-            id="backFile"
-            ref={backFileRef}
-            accept="image/*"
-            className="block w-full bg-stone-800 text-white rounded p-2"
-          />
-        </div>
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 disabled:opacity-50"
-        >
-          {loading ? "Submitting..." : "Submit KYC"}
-        </button>
-      </form>
+            {loading ? "Submitting..." : "Submit KYC"}
+          </button>
+        </form>
+      )}
+
       {error && <p className="text-red-500 mt-4">{error}</p>}
       {success && (
         <p className="text-green-500 mt-4">KYC submitted successfully!</p>
-      )}
-      {frontBlob && (
-        <div>
-          <p>Front Blob URL: <a href={frontBlob.url} target="_blank" rel="noopener noreferrer">{frontBlob.url}</a></p>
-        </div>
-      )}
-      {backBlob && (
-        <div>
-          <p>Back Blob URL: <a href={backBlob.url} target="_blank" rel="noopener noreferrer">{backBlob.url}</a></p>
-        </div>
       )}
     </div>
   );
