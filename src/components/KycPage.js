@@ -3,8 +3,8 @@ import { upload } from "@vercel/blob/client";
 
 const KycPage = () => {
   const [idType, setIdType] = useState("");
-  const [frontBlobUrl, setFrontBlobUrl] = useState(null);
-  const [backBlobUrl, setBackBlobUrl] = useState(null);
+  const [frontBlob, setFrontBlob] = useState(null);
+  const [backBlob, setBackBlob] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
@@ -13,16 +13,6 @@ const KycPage = () => {
   const API_URL =process.env.REACT_APP_API_URL2;
 
 
-  const handleUpload = async (file) => {
-    try {
-      const blob = await upload(file.name, file, {
-        access: "public",
-      });
-      return blob.url;
-    } catch (err) {
-      throw new Error("File upload failed: " + err.message);
-    }
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -46,22 +36,22 @@ const KycPage = () => {
         return;
       }
 
-      // Upload front and back images
-      const frontUrl = await upload(frontFile.name, frontFile,{
-        access:'public',
-        handleUploadUrl: `${API_URL}/api/kyc/upload`
+      // Upload front image
+      const frontBlob = await upload(frontFile.name, frontFile, {
+        access: "public",
+        handleUploadUrl: `${API_URL}/api/kyc/upload`,
       });
-      const backUrl = await upload(backFile.name, backFile,{
-        access:'public',
-        handleUploadUrl: `${API_URL}/api/kyc/upload`
+      setFrontBlob(frontBlob);
 
+      // Upload back image
+      const backBlob = await upload(backFile.name, backFile, {
+        access: "public",
+        handleUploadUrl: `${API_URL}/api/kyc/upload`,
       });
-
-      setFrontBlobUrl(frontUrl);
-      setBackBlobUrl(backUrl);
+      setBackBlob(backBlob);
 
       // Send data to backend
-      const response = await fetch("/api/kyc/submit", {
+      const response = await fetch(`${API_URL}/api/kyc/submit`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -69,8 +59,8 @@ const KycPage = () => {
         },
         body: JSON.stringify({
           idType,
-          frontUrl,
-          backUrl,
+          frontUrl: frontBlob.url,
+          backUrl: backBlob.url,
         }),
       });
 
@@ -142,6 +132,16 @@ const KycPage = () => {
       {error && <p className="text-red-500 mt-4">{error}</p>}
       {success && (
         <p className="text-green-500 mt-4">KYC submitted successfully!</p>
+      )}
+      {frontBlob && (
+        <div>
+          <p>Front Blob URL: <a href={frontBlob.url} target="_blank" rel="noopener noreferrer">{frontBlob.url}</a></p>
+        </div>
+      )}
+      {backBlob && (
+        <div>
+          <p>Back Blob URL: <a href={backBlob.url} target="_blank" rel="noopener noreferrer">{backBlob.url}</a></p>
+        </div>
       )}
     </div>
   );
