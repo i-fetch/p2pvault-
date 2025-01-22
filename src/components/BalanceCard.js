@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
+import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import icons for show/hide
 
 const BalanceCard = ({ userTier = "Basic Level" }) => {
   const [coins, setCoins] = useState([]);
@@ -9,10 +10,10 @@ const BalanceCard = ({ userTier = "Basic Level" }) => {
   const [username, setUsername] = useState("");
   const [walletID, setWalletID] = useState("");
   const [loading, setLoading] = useState(true); // Loading state
+  const [showBalance, setShowBalance] = useState(true); // Show/hide balance state
   const navigate = useNavigate();
   const API_URL = process.env.REACT_APP_API_URL2;
 
-  // Define the default coin data
   const coinsData = [
     { id: "bitcoin", name: "Bitcoin", symbol: "BTC", image: "https://cryptologos.cc/logos/bitcoin-btc-logo.png" },
     { id: "ethereum", name: "Ethereum", symbol: "ETH", image: "https://cryptologos.cc/logos/ethereum-eth-logo.png" },
@@ -22,7 +23,6 @@ const BalanceCard = ({ userTier = "Basic Level" }) => {
     { id: "ripple", name: "Ripple", symbol: "XRP", image: "https://cryptologos.cc/logos/xrp-xrp-logo.png" },
   ];
 
-  // Fetch user profile and coin data on component mount
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -34,7 +34,6 @@ const BalanceCard = ({ userTier = "Basic Level" }) => {
       }
 
       try {
-        // Fetch user profile
         const response = await axios.get(`${API_URL}/api/users/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -42,7 +41,6 @@ const BalanceCard = ({ userTier = "Basic Level" }) => {
         setUsername(response.data.username);
         setWalletID(response.data.wallet_id);
 
-        // Fetch coin balances
         const balanceResponse = await fetch(`${API_URL}/api/users/balances`, {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
@@ -55,14 +53,12 @@ const BalanceCard = ({ userTier = "Basic Level" }) => {
         const balanceData = await balanceResponse.json();
         const userBalances = balanceData.balances;
 
-        // Fetch prices for all coins in a single request
         const ids = coinsData.map((coin) => coin.id).join(",");
         const priceResponse = await axios.get(
           `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`
         );
         const prices = priceResponse.data;
 
-        // Update coins data with user balances and current prices
         const updatedCoins = coinsData.map((coin) => ({
           ...coin,
           balance: userBalances?.[coin.id] || 0.0,
@@ -81,7 +77,6 @@ const BalanceCard = ({ userTier = "Basic Level" }) => {
     fetchData();
   }, [navigate]);
 
-  // Calculate total balance based on coins data
   useEffect(() => {
     const calculateTotalBalance = () => {
       if (coins.every((coin) => coin.balance !== undefined && coin.current_price !== undefined)) {
@@ -110,8 +105,18 @@ const BalanceCard = ({ userTier = "Basic Level" }) => {
     <div className="flex justify-center items-center w-full py-6 px-3">
       <div className="bg-gradient-to-r from-stone-900 via-black-900 to-pink-700 text-white p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-[90%] sm:max-w-sm md:max-w-md lg:max-w-4xl mx-auto">
         <h3 className="text-lg sm:text-xl font-bold mb-2">Hello, {username || "User"}!</h3>
-        <h3 className="text-lg sm:text-xl font-bold mb-2">Total Balance</h3>
-        <p className="text-2xl sm:text-3xl font-bold mb-4">${totalBalance.toFixed(2)}</p>
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg sm:text-xl font-bold mb-2">Total Balance</h3>
+          <button
+            onClick={() => setShowBalance(!showBalance)}
+            className="text-white focus:outline-none"
+          >
+            {showBalance ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+          </button>
+        </div>
+        <p className="text-2xl sm:text-3xl font-bold mb-4">
+          {showBalance ? `$${totalBalance.toFixed(2)}` : "****"}
+        </p>
 
         {walletID ? (
           <div className="mb-3">
