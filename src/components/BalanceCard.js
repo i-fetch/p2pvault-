@@ -7,10 +7,10 @@ const BalanceCard = ({ userTier = "Basic Level" }) => {
   const [coins, setCoins] = useState([]);
   const [totalBalance, setTotalBalance] = useState(0);
   const [username, setUsername] = useState("");
-  const [walletID, setWalletID] = useState(""); // State for wallet ID
+  const [walletID, setWalletID] = useState("");
+  const [loading, setLoading] = useState(true); // Loading state
   const navigate = useNavigate();
-  const API_URL =process.env.REACT_APP_API_URL2;
-
+  const API_URL = process.env.REACT_APP_API_URL2;
 
   // Define the default coin data
   const coinsData = [
@@ -25,6 +25,7 @@ const BalanceCard = ({ userTier = "Basic Level" }) => {
   // Fetch user profile and coin data on component mount
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       const token = localStorage.getItem("token");
 
       if (!token) {
@@ -39,7 +40,7 @@ const BalanceCard = ({ userTier = "Basic Level" }) => {
         });
 
         setUsername(response.data.username);
-        setWalletID(response.data.wallet_id); // Set wallet ID from response
+        setWalletID(response.data.wallet_id);
 
         // Fetch coin balances
         const balanceResponse = await fetch(`${API_URL}/api/users/balances`, {
@@ -54,31 +55,26 @@ const BalanceCard = ({ userTier = "Basic Level" }) => {
         const balanceData = await balanceResponse.json();
         const userBalances = balanceData.balances;
 
-        // Update coins data with user balances
-        let updatedCoins = coinsData.map((coin) => {
-          return {
-            ...coin,
-            balance: userBalances?.[coin.id] || 0.0,
-          };
-        });
+        // Fetch prices for all coins in a single request
+        const ids = coinsData.map((coin) => coin.id).join(",");
+        const priceResponse = await axios.get(
+          `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`
+        );
+        const prices = priceResponse.data;
 
-        // Fetch current prices for each coin (using CoinGecko API or any other API)
-        const pricePromises = updatedCoins.map(async (coin) => {
-          try {
-            const priceResponse = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${coin.id}&vs_currencies=usd`);
-            const currentPrice = priceResponse.data[coin.id]?.usd || 0;
-            return { ...coin, current_price: currentPrice };
-          } catch (error) {
-            console.error("Error fetching coin price:", error);
-            return { ...coin, current_price: 0 }; // Fallback if price fetch fails
-          }
-        });
+        // Update coins data with user balances and current prices
+        const updatedCoins = coinsData.map((coin) => ({
+          ...coin,
+          balance: userBalances?.[coin.id] || 0.0,
+          current_price: prices[coin.id]?.usd || 0,
+        }));
 
-        const coinsWithPrices = await Promise.all(pricePromises);
-        setCoins(coinsWithPrices);
+        setCoins(updatedCoins);
       } catch (error) {
         console.error("Error fetching data:", error);
         navigate("/login");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -88,11 +84,13 @@ const BalanceCard = ({ userTier = "Basic Level" }) => {
   // Calculate total balance based on coins data
   useEffect(() => {
     const calculateTotalBalance = () => {
-      const total = coins.reduce((acc, coin) => {
-        const coinValue = (coin.balance || 0) * (coin.current_price || 0);
-        return acc + coinValue;
-      }, 0);
-      setTotalBalance(total);
+      if (coins.every((coin) => coin.balance !== undefined && coin.current_price !== undefined)) {
+        const total = coins.reduce((acc, coin) => {
+          const coinValue = (coin.balance || 0) * (coin.current_price || 0);
+          return acc + coinValue;
+        }, 0);
+        setTotalBalance(total);
+      }
     };
 
     if (coins.length > 0) {
@@ -103,6 +101,10 @@ const BalanceCard = ({ userTier = "Basic Level" }) => {
   const handleTransactionHistoryClick = () => {
     navigate("/transaction-history", { state: { coins } });
   };
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
 
   return (
     <div className="flex justify-center items-center w-full py-6 px-3">
