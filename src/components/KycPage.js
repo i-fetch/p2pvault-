@@ -1,5 +1,4 @@
 import React, { useState, useRef } from "react";
-import { upload } from "@vercel/blob/client";
 
 const KycPage = () => {
   const [idType, setIdType] = useState("");
@@ -10,7 +9,7 @@ const KycPage = () => {
   const [success, setSuccess] = useState(false);
   const frontFileRef = useRef(null);
   const backFileRef = useRef(null);
-  const API_URL = process.env.REACT_APP_API_URL2; // Ensure this is set correctly
+  const API_URL = process.env.REACT_APP_API_URL2;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,38 +33,38 @@ const KycPage = () => {
         return;
       }
 
-      // Upload front image
-      const frontBlob = await upload(frontFile.name, frontFile, {
-        access: "public",
-        handleUploadUrl: `${API_URL}/api/kyc/upload`, // Ensure this is the correct backend URL
-      });
-      setFrontBlob(frontBlob);
+      // Prepare FormData for file upload
+      const formData = new FormData();
+      formData.append("frontFile", frontFile);
+      formData.append("backFile", backFile);
 
-      // Upload back image
-      const backBlob = await upload(backFile.name, backFile, {
-        access: "public",
-        handleUploadUrl: `${API_URL}/api/kyc/upload`, // Ensure this is the correct backend URL
+      // Send the files to the backend for upload
+      const uploadResponse = await fetch(`${API_URL}/api/kyc/upload`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: formData,
       });
-      setBackBlob(backBlob);
 
-      // Send data to backend
-      const token = localStorage.getItem("token"); // Ensure token is fetched from localStorage
-      if (!token) {
-        setError("Token is missing.");
-        setLoading(false);
-        return;
+      if (!uploadResponse.ok) {
+        const { error } = await uploadResponse.json();
+        throw new Error(error || "Failed to upload files.");
       }
 
+      const { frontUrl, backUrl } = await uploadResponse.json();
+
+      // Send the KYC details to the backend
       const response = await fetch(`${API_URL}/api/kyc/submit`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Include the token in the Authorization header
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: JSON.stringify({
           idType,
-          frontUrl: frontBlob.url,
-          backUrl: backBlob.url,
+          frontUrl,
+          backUrl,
         }),
       });
 
