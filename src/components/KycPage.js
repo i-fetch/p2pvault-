@@ -10,6 +10,8 @@ const KycPage = () => {
   const [success, setSuccess] = useState(false);
   const frontFileRef = useRef(null);
   const backFileRef = useRef(null);
+  const API_URL =process.env.REACT_APP_API_URL2;
+
 
   const handleUpload = async (file) => {
     try {
@@ -47,11 +49,11 @@ const KycPage = () => {
       // Upload front and back images
       const frontUrl = await upload(frontFile.name, frontFile,{
         access:'public',
-        handleUploadUrl: '/api/kyc/upload'
+        handleUploadUrl: `${API_URL}/api/kyc/upload`
       });
       const backUrl = await upload(backFile.name, backFile,{
         access:'public',
-        handleUploadUrl: '/api/kyc/upload'
+        handleUploadUrl: `${API_URL}/api/kyc/upload`
 
       });
 
