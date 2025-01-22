@@ -105,8 +105,8 @@ const BalanceCard = ({ userTier = "Basic Level" }) => {
     <div className="flex justify-center items-center w-full py-6 px-3">
       <div className="bg-gradient-to-r from-stone-900 via-black-900 to-pink-700 text-white p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-[90%] sm:max-w-sm md:max-w-md lg:max-w-4xl mx-auto">
         <h3 className="text-lg sm:text-xl font-bold mb-2">Hello, {username || "User"}!</h3>
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg sm:text-xl font-bold mb-2">Total Balance</h3>
+        <div className="flex items-center justify-start mb-4">
+          <h3 className="text-lg sm:text-xl font-bold mr-2">Total Balance</h3>
           <button
             onClick={() => setShowBalance(!showBalance)}
             className="text-white focus:outline-none"
@@ -114,9 +114,10 @@ const BalanceCard = ({ userTier = "Basic Level" }) => {
             {showBalance ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
           </button>
         </div>
-        <p className="text-2xl sm:text-3xl font-bold mb-4">
+        <p className="text-2xl sm:text-3xl font-bold">
           {showBalance ? `$${totalBalance.toFixed(2)}` : "****"}
         </p>
+
 
         {walletID ? (
           <div className="mb-3">
