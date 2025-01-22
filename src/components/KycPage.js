@@ -47,11 +47,11 @@ const KycPage = () => {
       // Upload front and back images
       const frontUrl = await upload(frontFile.name, frontFile,{
         access:'public',
-        handleUploadUrl: '/api/upload'
+        handleUploadUrl: '/api/kyc/upload'
       });
       const backUrl = await upload(backFile.name, backFile,{
         access:'public',
-        handleUploadUrl: '/api/upload'
+        handleUploadUrl: '/api/kyc/upload'
 
       });
 
