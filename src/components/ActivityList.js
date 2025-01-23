@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import $ from "jquery";  // Importing jQuery
+import $ from "jquery"; // Importing jQuery
 
 const API_URL = process.env.REACT_APP_API_URL2;
 
@@ -83,7 +83,12 @@ const ActivityList = () => {
 
   const formatNumber = (value) => {
     const number = parseFloat(value);
-    return isNaN(number) ? "0.00" : number.toFixed(2);
+    if (isNaN(number)) return "0.00";
+
+    if (number >= 1e9) return `${(number / 1e9).toFixed(2)}B`;
+    if (number >= 1e6) return `${(number / 1e6).toFixed(2)}M`;
+    if (number >= 1e3) return `${(number / 1e3).toFixed(2)}K`;
+    return number.toFixed(2);
   };
 
   const handleCoinClick = (coin) => {

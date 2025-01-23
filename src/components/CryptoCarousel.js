@@ -33,7 +33,7 @@ const CryptoCarousel = () => {
 
   // Carousel settings
   const settings = {
-    dots: true,
+    
     infinite: true,
     autoplay: true,
     autoplaySpeed: 3000,
@@ -65,7 +65,7 @@ const CryptoCarousel = () => {
   return (
     <div className="crypto-carousel px-4 sm:px-6 md:px-8 lg:px-10 w-full max-w-4xl mx-auto py-6">
       <h2 className="text-center text-2xl font-bold mb-6 text-gray-100">
-        Cryptocurrency Market Prices
+        Market Prices
       </h2>
 
       {loading ? (
