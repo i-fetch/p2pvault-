@@ -14,12 +14,18 @@ const TierComponent = ({ userTier, userId }) => {
 
   // Fetch tier request status and user tier
   const fetchTierRequestStatus = async () => {
-   
+    try {
+      const response = await axios.get(`${API_URL}/api/users/tier-upgrade/status`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
 
-       catch (error) {
-      console.error("Error fetching tier request status:", error);
-      setErrorMessage("Error fetching tier request status.");
-    }
+    //   const { status, tierLevel } = response.data;
+    //   setCurrentTierRequestStatus(status);
+    //   setCurrentUserTier(tierLevel);
+    // } catch (error) {
+    //   console.error("Error fetching tier request status:", error);
+    //   setErrorMessage("Error fetching tier request status.");
+    // }
   };
 
   useEffect(() => {
@@ -145,7 +151,6 @@ const TierComponent = ({ userTier, userId }) => {
       {errorMessage && <div className="mt-4 text-red-500">{errorMessage}</div>}
     </div>
   );
-
 };
 
 export default TierComponent;
