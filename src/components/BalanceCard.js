@@ -2,15 +2,15 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
-import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import icons for show/hide
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const BalanceCard = ({ userTier = "Basic Level" }) => {
   const [coins, setCoins] = useState([]);
   const [totalBalance, setTotalBalance] = useState(0);
   const [username, setUsername] = useState("");
   const [walletID, setWalletID] = useState("");
-  const [loading, setLoading] = useState(true); // Loading state
-  const [showBalance, setShowBalance] = useState(true); // Show/hide balance state
+  const [loading, setLoading] = useState(true);
+  const [showBalance, setShowBalance] = useState(true);
   const navigate = useNavigate();
   const API_URL = process.env.REACT_APP_API_URL2;
 
@@ -115,9 +115,13 @@ const BalanceCard = ({ userTier = "Basic Level" }) => {
           </button>
         </div>
         <p className="text-2xl sm:text-3xl font-bold">
-          {showBalance ? `$${totalBalance.toFixed(2)}` : "****"}
+          {showBalance
+            ? `$${new Intl.NumberFormat("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              }).format(totalBalance)}`
+            : "****"}
         </p>
-
 
         {walletID ? (
           <div className="mb-3">
