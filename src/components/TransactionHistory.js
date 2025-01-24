@@ -49,7 +49,6 @@ const TransactionHistory = () => {
         ) : (
           <ul>
             {transactions.map((transaction, index) => {
-              console.log("Transaction:", transaction); // Log each transaction
 
               // Adjust this field name based on the actual API response
               const isDeposit =
