@@ -52,34 +52,45 @@ const TransactionHistory = () => {
           <p>No transactions yet.</p>
         ) : (
           <ul>
-            {transactions.map((transaction, index) => (
-              <li
-                key={index}
-                className={`mb-4 p-4 rounded-lg ${
-                  transaction.transaction_type === "deposit"
-                    ? "bg-green-700"
-                    : "bg-red-700"
-                }`}
-              >
-                <p>
-                  <strong>Coin:</strong> {transaction.coin}
-                </p>
-                <p>
-                  <strong>Amount:</strong>{" "}
-                  {formatNumber(transaction.amount)} {transaction.coin}
-                </p>
-                <p>
-                  <strong>Recipient:</strong> {transaction.recipient}
-                </p>
-                <p>
-                  <strong>Status:</strong> {transaction.status}
-                </p>
-                <p>
-                  <strong>Timestamp:</strong>{" "}
-                  {new Date(transaction.timestamp).toLocaleString()}
-                </p>
-              </li>
-            ))}
+            {transactions.map((transaction, index) => {
+              const isDeposit = transaction.transaction_type === "deposit";
+              const amountFormatted = `${isDeposit ? "+" : "-"}${formatNumber(
+                transaction.amount
+              )}`;
+
+              return (
+                <li
+                  key={index}
+                  className={`mb-4 p-4 rounded-lg ${
+                    isDeposit ? "bg-green-700" : "bg-red-700"
+                  }`}
+                >
+                  <p>
+                    <strong>Coin:</strong> {transaction.coin}
+                  </p>
+                  <p>
+                    <strong>Amount:</strong>{" "}
+                    <span
+                      className={`font-bold ${
+                        isDeposit ? "text-green-200" : "text-red-200"
+                      }`}
+                    >
+                      {amountFormatted} {transaction.coin}
+                    </span>
+                  </p>
+                  <p>
+                    <strong>Recipient:</strong> {transaction.recipient}
+                  </p>
+                  <p>
+                    <strong>Status:</strong> {transaction.status}
+                  </p>
+                  <p>
+                    <strong>Timestamp:</strong>{" "}
+                    {new Date(transaction.timestamp).toLocaleString()}
+                  </p>
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>
