@@ -52,9 +52,11 @@ const TransactionHistory = () => {
             {transactions.map((transaction, index) => {
               console.log("Transaction:", transaction); // Log each transaction
 
-              const isDeposit = transaction.status?.toLowerCase() === "deposit"; // Use 'status' for transaction type
+              // Adjust this field name based on the actual API response
+              const isDeposit =
+                transaction.status?.toLowerCase() === "deposit"; // Case-insensitive match
               const amountFormatted = `${isDeposit ? "+" : "-"}${formatNumber(
-                parseFloat(transaction.amount)
+                transaction.amount
               )}`;
 
               return (
