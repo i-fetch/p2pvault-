@@ -15,6 +15,7 @@ const TransactionHistory = () => {
             Authorization: `Bearer ${token}`, // Use the token in the header
           },
         });
+        console.log("API Response:", response.data); // Log the entire API response
         setTransactions(response.data.transactions);
       } catch (error) {
         console.error("Error fetching transactions:", error);
@@ -49,11 +50,11 @@ const TransactionHistory = () => {
         ) : (
           <ul>
             {transactions.map((transaction, index) => {
-              // Debugging the transaction type
-              console.log("Transaction Type:", transaction.transaction_type);
+              console.log("Transaction:", transaction); // Log each transaction
 
-              // Check for deposit or withdrawal
-              const isDeposit = transaction.transaction_type?.toLowerCase() === "deposit"; // Case-insensitive match
+              // Adjust this field name based on the actual API response
+              const isDeposit =
+                transaction.transaction_type?.toLowerCase() === "deposit"; // Case-insensitive match
               const amountFormatted = `${isDeposit ? "+" : "-"}${formatNumber(
                 transaction.amount
               )}`;
