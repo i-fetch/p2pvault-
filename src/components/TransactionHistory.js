@@ -1,19 +1,11 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+
 const API_URL = process.env.REACT_APP_API_URL2;
 
 const TransactionHistory = () => {
   const [transactions, setTransactions] = useState([]);
   const token = localStorage.getItem("token"); // Get the token from localStorage
-
-  // Utility function to format numbers with commas and fixed decimal places
-  const formatNumber = (value) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "decimal",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value);
-  };
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -34,6 +26,10 @@ const TransactionHistory = () => {
     }
   }, [token]); // Refetch when token changes
 
+  const formatNumber = (number) => {
+    return new Intl.NumberFormat("en-US").format(number);
+  };
+
   if (!transactions) {
     return (
       <div className="p-6 bg-white dark:bg-zinc-900 rounded-lg shadow-lg w-full max-w-5xl mx-auto">
@@ -49,11 +45,15 @@ const TransactionHistory = () => {
       </h2>
       <div>
         {transactions.length === 0 ? (
-          <p>No transactions yet.</p>
+          <p className="text-gray-200">No transactions yet.</p>
         ) : (
           <ul>
             {transactions.map((transaction, index) => {
-              const isDeposit = transaction.transaction_type === "deposit";
+              // Debugging the transaction type
+              console.log("Transaction Type:", transaction.transaction_type);
+
+              // Check for deposit or withdrawal
+              const isDeposit = transaction.transaction_type?.toLowerCase() === "deposit"; // Case-insensitive match
               const amountFormatted = `${isDeposit ? "+" : "-"}${formatNumber(
                 transaction.amount
               )}`;
