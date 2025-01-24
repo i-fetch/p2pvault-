@@ -15,7 +15,6 @@ const TransactionHistory = () => {
             Authorization: `Bearer ${token}`, // Use the token in the header
           },
         });
-        console.log("API Response:", response.data); // Log the entire API response
         setTransactions(response.data.transactions);
       } catch (error) {
         console.error("Error fetching transactions:", error);
