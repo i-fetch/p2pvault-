@@ -6,6 +6,15 @@ const TransactionHistory = () => {
   const [transactions, setTransactions] = useState([]);
   const token = localStorage.getItem("token"); // Get the token from localStorage
 
+  // Utility function to format numbers with commas and fixed decimal places
+  const formatNumber = (value) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "decimal",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
+  };
+
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
@@ -52,11 +61,23 @@ const TransactionHistory = () => {
                     : "bg-red-700"
                 }`}
               >
-                <p><strong>Coin:</strong> {transaction.coin}</p>
-                <p><strong>Amount:</strong> {transaction.amount} {transaction.coin}</p>
-                <p><strong>Recipient:</strong> {transaction.recipient}</p>
-                <p><strong>Status:</strong> {transaction.status}</p>
-                <p><strong>Timestamp:</strong> {new Date(transaction.timestamp).toLocaleString()}</p>
+                <p>
+                  <strong>Coin:</strong> {transaction.coin}
+                </p>
+                <p>
+                  <strong>Amount:</strong>{" "}
+                  {formatNumber(transaction.amount)} {transaction.coin}
+                </p>
+                <p>
+                  <strong>Recipient:</strong> {transaction.recipient}
+                </p>
+                <p>
+                  <strong>Status:</strong> {transaction.status}
+                </p>
+                <p>
+                  <strong>Timestamp:</strong>{" "}
+                  {new Date(transaction.timestamp).toLocaleString()}
+                </p>
               </li>
             ))}
           </ul>
