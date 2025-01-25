@@ -35,19 +35,18 @@ const getWalletAddress = (coinName, network) => {
     : "No Address Available";
 };
 
-const TransactionForm = ({ addTransaction, getUserBalance }) => {
+const TransactionForm = ({ userBalances = {}, addTransaction }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
   const [amount, setAmount] = useState("");
   const [address, setAddress] = useState("");
   const [network, setNetwork] = useState("");
-  const [gasFee, setGasFee] = useState(0.5); // Fixed gas fee in ETH
   const [error, setError] = useState("");
+  const [gasFee, setGasFee] = useState(0.5); // Fixed ETH gas fee
   const [isReceiving, setIsReceiving] = useState(false);
   const [walletAddress, setWalletAddress] = useState("");
   const [receiveNetwork, setReceiveNetwork] = useState("");
-  const [userBalance, setUserBalance] = useState(0); // User's balance
   const [isCopied, setIsCopied] = useState(false);
 
   const { coin } = location.state || {}; // Retrieve coin data passed from ActivityList
@@ -65,25 +64,11 @@ const TransactionForm = ({ addTransaction, getUserBalance }) => {
 
     const address = getWalletAddress(coinName, defaultNetwork);
     setWalletAddress(address);
-
-    // Fetch user's balance for the selected coin
-    fetchUserBalance(coinName);
   }, [coinName]);
-
-  const fetchUserBalance = async (coinName) => {
-    try {
-      const balance = await getUserBalance(coinName); // Replace with actual API call
-      setUserBalance(balance);
-    } catch (err) {
-      setError("Unable to fetch balance. Please try again later.");
-    }
-  };
 
   const handleBack = () => navigate(-1);
 
-  const handleSend = () => {
-    const totalCost = parseFloat(amount) + gasFee;
-
+  const handleSend = async () => {
     if (!amount || parseFloat(amount) <= 0) {
       setError("Invalid amount. Please enter a valid number.");
       return;
@@ -94,25 +79,44 @@ const TransactionForm = ({ addTransaction, getUserBalance }) => {
       return;
     }
 
-    if (userBalance < totalCost) {
-      setError(
-        `Insufficient balance. You need at least ${totalCost} ETH (including a gas fee of 0.5 ETH). Please contact support for assistance.`
-      );
-      return;
+    try {
+      // Fetch the user's balance for the selected coin from the database
+      const response = await fetch(`/api/user-balance?coin=${coinName}`);
+      const { balance } = await response.json();
+
+      if (!response.ok) {
+        setError("Failed to fetch balance. Please try again later.");
+        return;
+      }
+
+      if (balance < parseFloat(amount)) {
+        setError(
+          `Insufficient balance for ${coinName}. Gas fee of 0.5 ETH is required. Please contact support.`
+        );
+        return;
+      }
+
+      if (balance < parseFloat(amount) + gasFee) {
+        setError(
+          `Your balance is insufficient to cover the transaction and the gas fee of 0.5 ETH.`
+        );
+        return;
+      }
+
+      // Deduct gas fee and add transaction
+      addTransaction({
+        type: "Send",
+        coin: coinName,
+        amount: parseFloat(amount),
+        address,
+        network,
+      });
+
+      alert(`Transaction successful: ${amount} ${coinName} sent to ${address}`);
+      navigate(-1);
+    } catch (error) {
+      setError("An error occurred while processing the transaction.");
     }
-
-    setError(""); // Clear any previous errors
-
-    // Process the transaction
-    addTransaction({
-      coin: coinName,
-      amount,
-      address,
-      network,
-      gasFee,
-    });
-
-    navigate("/transactions"); // Redirect to transactions page
   };
 
   const handleReceive = () => setIsReceiving(!isReceiving);
@@ -189,16 +193,6 @@ const TransactionForm = ({ addTransaction, getUserBalance }) => {
             ))}
           </select>
         </div>
-        <div className="mb-4">
-          <span className="text-gray-300">
-            Gas Fee: <strong>{gasFee} ETH</strong>
-          </span>
-        </div>
-        <div className="mb-4">
-          <span className="text-gray-300">
-            Your Balance: <strong>{userBalance} ETH</strong>
-          </span>
-        </div>
         <button
           onClick={handleSend}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -235,7 +229,9 @@ const TransactionForm = ({ addTransaction, getUserBalance }) => {
               </select>
             </div>
             <div className="text-sm md:text-base text-gray-200 mb-2 break-words w-full max-w-full mx-auto flex items-center justify-between">
-              <span className="truncate" title={walletAddress}>{walletAddress}</span>
+              <span className="truncate" title={walletAddress}>
+                {walletAddress}
+              </span>
               <CopyToClipboard text={walletAddress} onCopy={handleCopy}>
                 <button className="ml-2 px-2 py-1 bg-gray-600 text-white rounded-lg">
                   {isCopied ? <FaClipboardCheck /> : <FaClipboard />}
