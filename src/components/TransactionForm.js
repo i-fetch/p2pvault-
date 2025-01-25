@@ -9,7 +9,7 @@ const networkOptions = {
   Ethereum: ["ERC20", "BSC"],
   Solana: ["Solana"],
   TON: ["TON"],
-  Tether: ["ERC20", "TRC20", "BEP20","ETH"],
+  Tether: ["ERC20", "TRC20", "BEP20", "ETH"],
   XRP: ["XRP"],
 };
 
@@ -18,7 +18,6 @@ const walletAddresses = {
   Ethereum: {
     ERC20: "0x8F0889b7F1Aac33999ad6e3361cE29e76BF8d470",
     BSC: "0x120995dac6a97050adb4f1c496200ec92d162beb",
-    
   },
   Solana: "FkYpX3f625MaaRmYVNF5AWtX3jXXP9iB9Y5AqeUYFFft",
   TON: "EQBIvhjeezdpYekgPEEa4qWF_XdmzBIyIgqwI4yvp5wTxLX0",
@@ -26,7 +25,6 @@ const walletAddresses = {
     ERC20: "0x120995dac6a97050adb4f1c496200ec92d162beb",
     TRC20: "TB2w4BhFrKtS4a7eWZGfCzkggmtc9FfSxY",
     BEP20: "0x120995dac6a97050adb4f1c496200ec92d162beb",
-    
   },
   XRP: "rKPyUkd7rPVmKY7KKbkMqhq49bYi6Tdd3h",
 };
@@ -37,18 +35,19 @@ const getWalletAddress = (coinName, network) => {
     : "No Address Available";
 };
 
-const TransactionForm = ({ userBalances = {}, addTransaction }) => {
+const TransactionForm = ({ addTransaction, getUserBalance }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
   const [amount, setAmount] = useState("");
   const [address, setAddress] = useState("");
   const [network, setNetwork] = useState("");
-  const [gasFee, setGasFee] = useState(0.02); // Fixed gas fee
+  const [gasFee, setGasFee] = useState(0.5); // Fixed gas fee in ETH
   const [error, setError] = useState("");
   const [isReceiving, setIsReceiving] = useState(false);
   const [walletAddress, setWalletAddress] = useState("");
-  const [receiveNetwork, setReceiveNetwork] = useState(""); // Network for receiving
+  const [receiveNetwork, setReceiveNetwork] = useState("");
+  const [userBalance, setUserBalance] = useState(0); // User's balance
   const [isCopied, setIsCopied] = useState(false);
 
   const { coin } = location.state || {}; // Retrieve coin data passed from ActivityList
@@ -66,11 +65,25 @@ const TransactionForm = ({ userBalances = {}, addTransaction }) => {
 
     const address = getWalletAddress(coinName, defaultNetwork);
     setWalletAddress(address);
+
+    // Fetch user's balance for the selected coin
+    fetchUserBalance(coinName);
   }, [coinName]);
+
+  const fetchUserBalance = async (coinName) => {
+    try {
+      const balance = await getUserBalance(coinName); // Replace with actual API call
+      setUserBalance(balance);
+    } catch (err) {
+      setError("Unable to fetch balance. Please try again later.");
+    }
+  };
 
   const handleBack = () => navigate(-1);
 
   const handleSend = () => {
+    const totalCost = parseFloat(amount) + gasFee;
+
     if (!amount || parseFloat(amount) <= 0) {
       setError("Invalid amount. Please enter a valid number.");
       return;
@@ -81,29 +94,25 @@ const TransactionForm = ({ userBalances = {}, addTransaction }) => {
       return;
     }
 
-    const balance = userBalances[coinName] || 0;
-    if (parseFloat(amount) > balance) {
-      setError("Insufficient balance.");
+    if (userBalance < totalCost) {
+      setError(
+        `Insufficient balance. You need at least ${totalCost} ETH (including a gas fee of 0.5 ETH). Please contact support for assistance.`
+      );
       return;
     }
 
-    // Deduct gas fee and add transaction
-    const totalAmount = parseFloat(amount) + gasFee;
-    if (totalAmount > balance) {
-      setError("Insufficient balance to cover the gas fee.");
-      return;
-    }
+    setError(""); // Clear any previous errors
 
+    // Process the transaction
     addTransaction({
-      type: "Send",
       coin: coinName,
-      amount: parseFloat(amount),
+      amount,
       address,
       network,
+      gasFee,
     });
 
-    alert(`Transaction successful: ${amount} ${coinName} sent to ${address}`);
-    navigate(-1);
+    navigate("/transactions"); // Redirect to transactions page
   };
 
   const handleReceive = () => setIsReceiving(!isReceiving);
@@ -179,6 +188,16 @@ const TransactionForm = ({ userBalances = {}, addTransaction }) => {
               </option>
             ))}
           </select>
+        </div>
+        <div className="mb-4">
+          <span className="text-gray-300">
+            Gas Fee: <strong>{gasFee} ETH</strong>
+          </span>
+        </div>
+        <div className="mb-4">
+          <span className="text-gray-300">
+            Your Balance: <strong>{userBalance} ETH</strong>
+          </span>
         </div>
         <button
           onClick={handleSend}
