@@ -80,7 +80,7 @@ const TransactionForm = () => {
     }
 
     setError(
-      `You do not have enough gas fee (0.5 ETH) to complete this transaction. Please ensure you have sufficient funds.`
+      "Insufficient balance. Please ensure you have enough funds to complete this transaction."
     );
   };
 
