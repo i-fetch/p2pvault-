@@ -49,13 +49,9 @@ const TransactionHistory = () => {
         ) : (
           <ul>
             {transactions.map((transaction, index) => {
-
-              // Adjust this field name based on the actual API response
               const isDeposit =
                 transaction.status?.toLowerCase() === "deposit"; // Case-insensitive match
-              const amountFormatted = `${isDeposit ? "+" : "-"}${formatNumber(
-                transaction.amount
-              )}`;
+              const amountFormatted = `${formatNumber(transaction.amount)}`;
 
               return (
                 <li
