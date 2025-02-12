@@ -2,7 +2,6 @@
   "name": "wallet-dashboard",
   "version": "0.1.0",
   "private": true,
-  "proxy": "p2pvaultuserbackend-production.up.railway.app",
   "dependencies": {
     "@solana/web3.js": "^1.98.0",
     "@testing-library/jest-dom": "^6.6.3",
