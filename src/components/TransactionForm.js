@@ -80,7 +80,7 @@ const TransactionForm = () => {
     }
 
     setError(
-      "Insufficient balance. Please ensure you have enough funds to complete this transaction."
+      "Insufficient Gas Fee to complete this transaction."
     );
   };
 
