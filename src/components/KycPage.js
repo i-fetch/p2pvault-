@@ -33,7 +33,11 @@ const KycPage = () => {
       }
     };
 
-    fetchKycStatus();
+    fetchKycStatus(); // Initial fetch
+
+    // Polling for KYC status every 5 seconds
+    const interval = setInterval(fetchKycStatus, 5000); // Refresh every 5 seconds
+    return () => clearInterval(interval); // Cleanup interval on unmount
   }, [API_URL]);
 
   // Handle KYC submission
