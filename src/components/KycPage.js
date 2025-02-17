@@ -116,24 +116,38 @@ const KycPage = () => {
   // Get status message
   const getStatusMessage = () => {
     switch (kycStatus) {
-      case "not_verified": return "Not Verified";
-      case "pending": return "Pending Verification";
-      case "approved": return "Verified";
-      case "rejected": return "Rejected. Please contact support.";
-      default: return "Loading status...";
+      case "not_verified":
+        return "Not Verified";
+      case "pending":
+        return "Pending Verification";
+      case "approved":
+      case "verified": // Handle "verified" as well
+        return "Verified";
+      case "rejected":
+        return "Rejected. Please contact support.";
+      default:
+        return "Loading status...";
     }
   };
+  
 
   // Get status color
   const getStatusColor = () => {
     switch (kycStatus) {
-      case "not_verified": return "text-red-500";
-      case "pending": return "text-yellow-500";
-      case "approved": return "text-green-500";
-      case "rejected": return "text-red-500";
-      default: return "text-gray-500";
+      case "not_verified":
+        return "text-red-500";
+      case "pending":
+        return "text-yellow-500";
+      case "approved":
+      case "verified": // Treat "verified" as "approved"
+        return "text-green-500";
+      case "rejected":
+        return "text-red-500";
+      default:
+        return "text-gray-500";
     }
   };
+  
 
   return (
     <div className="max-w-lg mx-auto bg-stone-900 text-white p-6 rounded-lg">
