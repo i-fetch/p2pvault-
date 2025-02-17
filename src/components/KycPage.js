@@ -110,14 +110,38 @@ const KycPage = () => {
       }
 
       setSuccess(true);
-      setKycStatus("pending"); // Update the status locally after submission
+      setLoading(false);
+      // Re-fetch KYC status after submission to reflect the change
+      await fetchKycStatus(); // Re-fetch KYC status
     } catch (err) {
       setError(err.message || "Failed to submit KYC details.");
-    } finally {
       setLoading(false);
     }
   };
 
+  // Fetch KYC status again to reflect the latest status
+  const fetchKycStatus = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/kyc/status`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch KYC status.");
+      }
+
+      const data = await response.json();
+      setKycStatus(data.status);
+    } catch (error) {
+      console.error(error.message);
+      setKycStatus("error");
+    }
+  };
+
+  // Get status message to display
   const getStatusMessage = () => {
     switch (kycStatus) {
       case "not_verified":
@@ -133,6 +157,7 @@ const KycPage = () => {
     }
   };
 
+  // Get status color based on the current KYC status
   const getStatusColor = () => {
     switch (kycStatus) {
       case "not_verified":
