@@ -5,7 +5,7 @@ const KycPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
-  const [kycStatus, setKycStatus] = useState("loading"); // "not_verified", "pending", "approved", "rejected", "loading"
+  const [kycStatus, setKycStatus] = useState("loading"); // "not_verified", "pending", "verified", "rejected", "loading"
   const frontFileRef = useRef(null);
   const backFileRef = useRef(null);
   const API_URL = process.env.REACT_APP_API_URL2;
@@ -13,6 +13,7 @@ const KycPage = () => {
   // Fetch KYC status
   const fetchKycStatus = useCallback(async () => {
     try {
+      console.log("Fetching KYC status...");
       const response = await fetch(`${API_URL}/api/kyc/status`, {
         method: "GET",
         headers: {
@@ -25,9 +26,17 @@ const KycPage = () => {
       }
 
       const data = await response.json();
-      setKycStatus(data.status);
+      console.log("KYC status response from backend:", data); // ✅ Debugging log
+
+      if (data.status) {
+        setKycStatus(data.status.toLowerCase()); // ✅ Convert to lowercase for consistency
+        console.log("Updated kycStatus state:", data.status.toLowerCase()); // ✅ Debugging log
+      } else {
+        console.error("KYC status missing in response");
+        setKycStatus("error");
+      }
     } catch (error) {
-      console.error("Error fetching KYC status:", error);
+      console.error("Error fetching KYC status:", error.message);
       setKycStatus("error");
     }
   }, [API_URL]);
@@ -48,7 +57,7 @@ const KycPage = () => {
     setError(null);
     setSuccess(false);
 
-    if (kycStatus === "approved") {
+    if (kycStatus === "verified") {
       setError("Your KYC is already verified.");
       setLoading(false);
       return;
@@ -115,13 +124,15 @@ const KycPage = () => {
 
   // Get status message
   const getStatusMessage = () => {
+    console.log("Rendering status message for:", kycStatus); // ✅ Debugging log
+
     switch (kycStatus) {
       case "not_verified":
         return "Not Verified";
       case "pending":
         return "Pending Verification";
       case "approved":
-      case "verified": // Handle "verified" as well
+      case "verified": // ✅ Ensure "verified" is properly mapped
         return "Verified";
       case "rejected":
         return "Rejected. Please contact support.";
@@ -129,7 +140,6 @@ const KycPage = () => {
         return "Loading status...";
     }
   };
-  
 
   // Get status color
   const getStatusColor = () => {
@@ -138,8 +148,8 @@ const KycPage = () => {
         return "text-red-500";
       case "pending":
         return "text-yellow-500";
+      case "verified": // ✅ Fix color mapping
       case "approved":
-      case "verified": // Treat "verified" as "approved"
         return "text-green-500";
       case "rejected":
         return "text-red-500";
@@ -147,7 +157,6 @@ const KycPage = () => {
         return "text-gray-500";
     }
   };
-  
 
   return (
     <div className="max-w-lg mx-auto bg-stone-900 text-white p-6 rounded-lg">
@@ -160,8 +169,8 @@ const KycPage = () => {
         </p>
       </div>
 
-      {/* Show form only if KYC is not approved */}
-      {kycStatus !== "approved" && (
+      {/* Show form only if KYC is not verified */}
+      {kycStatus !== "verified" && kycStatus !== "approved" && (
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="idType" className="block mb-2">Select ID Type</label>
