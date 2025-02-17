@@ -13,36 +13,29 @@ const KycPage = () => {
   // Fetch KYC status
   const fetchKycStatus = useCallback(async () => {
     try {
-      console.log("Fetching KYC status...");
-      const response = await fetch(`${API_URL}/api/kyc/status`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+        const response = await fetch(`${API_URL}/api/kyc/status`, {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch KYC status.");
-      }
+        if (!response.ok) {
+            throw new Error("Failed to fetch KYC status.");
+        }
 
-      const data = await response.json();
-      console.log("KYC status response from backend:", data); // ✅ Debugging log
-
-      if (data.status) {
-        setKycStatus(data.status.toLowerCase()); // ✅ Convert to lowercase for consistency
-        console.log("Updated kycStatus state:", data.status.toLowerCase()); // ✅ Debugging log
-      } else {
-        console.error("KYC status missing in response");
-        setKycStatus("error");
-      }
+        const data = await response.json();
+        console.log("KYC status response from backend:", data); // Debugging line
+        setKycStatus(data.status);
     } catch (error) {
-      console.error("Error fetching KYC status:", error.message);
-      setKycStatus("error");
+        console.error("Error fetching KYC status:", error);
+        setKycStatus("error");
     }
-  }, [API_URL]);
+}, [API_URL]);
 
   // Fetch KYC status on component mount
   useEffect(() => {
+    
     fetchKycStatus();
 
     // Poll KYC status every 5 seconds
