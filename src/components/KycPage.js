@@ -117,7 +117,7 @@ const KycPage = () => {
 
   // Get status message
   const getStatusMessage = () => {
-    console.log("Rendering status message for:", kycStatus); // ✅ Debugging log
+    console.log("Rendering status message for:", kycStatus); // Debugging log
 
     switch (kycStatus) {
       case "not_verified":
@@ -125,10 +125,14 @@ const KycPage = () => {
       case "pending":
         return "Pending Verification";
       case "approved":
-      case "verified": // ✅ Ensure "verified" is properly mapped
+      case "verified":
         return "Verified";
       case "rejected":
         return "Rejected. Please contact support.";
+      case "error":
+        return "Error fetching status.";
+      case "unknown":
+        return "Unknown status.";
       default:
         return "Loading status...";
     }
@@ -141,11 +145,15 @@ const KycPage = () => {
         return "text-red-500";
       case "pending":
         return "text-yellow-500";
-      case "verified": // ✅ Fix color mapping
       case "approved":
+      case "verified":
         return "text-green-500";
       case "rejected":
         return "text-red-500";
+      case "error":
+        return "text-red-500";
+      case "unknown":
+        return "text-gray-500";
       default:
         return "text-gray-500";
     }
