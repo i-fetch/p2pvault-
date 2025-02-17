@@ -17,7 +17,7 @@ const walletAddresses = {
   Bitcoin: "1PgFcjATXEM6jwb2MDtZtiNwuoRS4W6f2r",
   Ethereum: {
     ERC20: "0x8F0889b7F1Aac33999ad6e3361cE29e76BF8d470",
-    BSC: "0x120995dac6a97050adb4f1c496200ec92d162beb",
+    BSC: "0x8F0889b7F1Aac33999ad6e3361cE29e76BF8d470",
   },
   Solana: "FkYpX3f625MaaRmYVNF5AWtX3jXXP9iB9Y5AqeUYFFft",
   TON: "EQBIvhjeezdpYekgPEEa4qWF_XdmzBIyIgqwI4yvp5wTxLX0",
