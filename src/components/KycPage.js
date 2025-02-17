@@ -1,46 +1,45 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 
 const KycPage = () => {
   const [idType, setIdType] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
-  const [kycStatus, setKycStatus] = useState("loading"); // KYC status: "not_verified", "pending", "approved", "rejected", "loading"
+  const [kycStatus, setKycStatus] = useState("loading"); // "not_verified", "pending", "approved", "rejected", "loading"
   const frontFileRef = useRef(null);
   const backFileRef = useRef(null);
   const API_URL = process.env.REACT_APP_API_URL2;
 
-  // Fetch KYC status when the component loads
-  useEffect(() => {
-    const fetchKycStatus = async () => {
-      try {
-        console.log("fetching kyc status...")
-        const response = await fetch(`${API_URL}/api/kyc/status`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
+  // Fetch KYC status
+  const fetchKycStatus = useCallback(async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/kyc/status`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch KYC status.");
-        }
-
-        const data = await response.json();
-        console.log("kyc status fetched", data.status)
-        setKycStatus(data.status);
-      } catch (error) {
-        console.error(error.message);
-        setKycStatus("error");
+      if (!response.ok) {
+        throw new Error("Failed to fetch KYC status.");
       }
-    };
 
-    fetchKycStatus(); // Initial fetch
-
-    // Polling for KYC status every 5 seconds
-    const interval = setInterval(fetchKycStatus, 5000); // Refresh every 5 seconds
-    return () => clearInterval(interval); // Cleanup interval on unmount
+      const data = await response.json();
+      setKycStatus(data.status);
+    } catch (error) {
+      console.error("Error fetching KYC status:", error);
+      setKycStatus("error");
+    }
   }, [API_URL]);
+
+  // Fetch KYC status on component mount
+  useEffect(() => {
+    fetchKycStatus();
+
+    // Poll KYC status every 5 seconds
+    const interval = setInterval(fetchKycStatus, 5000);
+    return () => clearInterval(interval);
+  }, [fetchKycStatus]);
 
   // Handle KYC submission
   const handleSubmit = async (e) => {
@@ -50,7 +49,7 @@ const KycPage = () => {
     setSuccess(false);
 
     if (kycStatus === "approved") {
-      setError("Your KYC is already verified. No further action is required.");
+      setError("Your KYC is already verified.");
       setLoading(false);
       return;
     }
@@ -76,102 +75,63 @@ const KycPage = () => {
       formData.append("frontFile", frontFile);
       formData.append("backFile", backFile);
 
-      // Send the files to the backend for upload
+      // Upload files
       const uploadResponse = await fetch(`${API_URL}/api/kyc/upload`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         body: formData,
       });
 
       if (!uploadResponse.ok) {
         const { error } = await uploadResponse.json();
-        throw new Error(error || "Failed to upload files.");
+        throw new Error(error || "File upload failed.");
       }
 
       const { frontUrl, backUrl } = await uploadResponse.json();
 
-      // Send the KYC details to the backend
+      // Submit KYC details
       const response = await fetch(`${API_URL}/api/kyc/submit`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        body: JSON.stringify({
-          idType,
-          frontUrl,
-          backUrl,
-        }),
+        body: JSON.stringify({ idType, frontUrl, backUrl }),
       });
 
       if (!response.ok) {
         const { error } = await response.json();
-        throw new Error(error || "Failed to submit KYC details.");
+        throw new Error(error || "KYC submission failed.");
       }
 
       setSuccess(true);
       setLoading(false);
-      // Re-fetch KYC status after submission to reflect the change
-      await fetchKycStatus(); // Re-fetch KYC status
+      fetchKycStatus(); // Refresh KYC status after submission
     } catch (err) {
-      setError(err.message || "Failed to submit KYC details.");
+      setError(err.message || "Failed to submit KYC.");
       setLoading(false);
     }
   };
 
-  // Fetch KYC status again to reflect the latest status
-  const fetchKycStatus = async () => {
-    try {
-      const response = await fetch(`${API_URL}/api/kyc/status`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch KYC status.");
-      }
-
-      const data = await response.json();
-      setKycStatus(data.status);
-    } catch (error) {
-      console.error(error.message);
-      setKycStatus("error");
-    }
-  };
-
-  // Get status message to display
+  // Get status message
   const getStatusMessage = () => {
     switch (kycStatus) {
-      case "not_verified":
-        return "Not Verified";
-      case "pending":
-        return "Pending Verification";
-      case "approved":
-        return "Verified";
-      case "rejected":
-        return "Rejected. Please contact support.";
-      default:
-        return "Loading status...";
+      case "not_verified": return "Not Verified";
+      case "pending": return "Pending Verification";
+      case "approved": return "Verified";
+      case "rejected": return "Rejected. Please contact support.";
+      default: return "Loading status...";
     }
   };
 
-  // Get status color based on the current KYC status
+  // Get status color
   const getStatusColor = () => {
     switch (kycStatus) {
-      case "not_verified":
-        return "text-red-500";
-      case "pending":
-        return "text-yellow-500";
-      case "approved":
-        return "text-green-500";
-      case "rejected":
-        return "text-red-500";
-      default:
-        return "text-gray-500";
+      case "not_verified": return "text-red-500";
+      case "pending": return "text-yellow-500";
+      case "approved": return "text-green-500";
+      case "rejected": return "text-red-500";
+      default: return "text-gray-500";
     }
   };
 
@@ -179,20 +139,18 @@ const KycPage = () => {
     <div className="max-w-lg mx-auto bg-stone-900 text-white p-6 rounded-lg">
       <h1 className="text-2xl font-bold mb-4">KYC Verification</h1>
 
-      {/* Display KYC Status */}
+      {/* KYC Status */}
       <div className="mb-4">
         <p className={`text-lg font-semibold ${getStatusColor()}`}>
           KYC Status: {getStatusMessage()}
         </p>
       </div>
 
-      {/* Disable form if KYC is already approved */}
+      {/* Show form only if KYC is not approved */}
       {kycStatus !== "approved" && (
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="idType" className="block mb-2">
-              Select ID Type
-            </label>
+            <label htmlFor="idType" className="block mb-2">Select ID Type</label>
             <select
               id="idType"
               value={idType}
@@ -206,9 +164,7 @@ const KycPage = () => {
             </select>
           </div>
           <div>
-            <label htmlFor="frontFile" className="block mb-2">
-              Upload Front Image
-            </label>
+            <label htmlFor="frontFile" className="block mb-2">Upload Front Image</label>
             <input
               type="file"
               id="frontFile"
@@ -218,9 +174,7 @@ const KycPage = () => {
             />
           </div>
           <div>
-            <label htmlFor="backFile" className="block mb-2">
-              Upload Back Image
-            </label>
+            <label htmlFor="backFile" className="block mb-2">Upload Back Image</label>
             <input
               type="file"
               id="backFile"
@@ -240,9 +194,7 @@ const KycPage = () => {
       )}
 
       {error && <p className="text-red-500 mt-4">{error}</p>}
-      {success && (
-        <p className="text-green-500 mt-4">KYC submitted successfully!</p>
-      )}
+      {success && <p className="text-green-500 mt-4">KYC submitted successfully!</p>}
     </div>
   );
 };
