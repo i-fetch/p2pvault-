@@ -14,6 +14,7 @@ const KycPage = () => {
   useEffect(() => {
     const fetchKycStatus = async () => {
       try {
+        console.log("fetching kyc status...")
         const response = await fetch(`${API_URL}/api/kyc/status`, {
           method: "GET",
           headers: {
@@ -26,6 +27,7 @@ const KycPage = () => {
         }
 
         const data = await response.json();
+        console.log("kyc status fetched", data.status)
         setKycStatus(data.status);
       } catch (error) {
         console.error(error.message);
