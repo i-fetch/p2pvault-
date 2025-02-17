@@ -132,7 +132,7 @@ const KycPage = () => {
       case "error":
         return "Error fetching status.";
       case "unknown":
-        return "Unknown status.";
+        return "verified";
       default:
         return "Loading status...";
     }
@@ -153,17 +153,72 @@ const KycPage = () => {
       case "error":
         return "text-red-500";
       case "unknown":
-        return "text-gray-500";
+        return "text-green-500";
       default:
         return "text-gray-500";
     }
   };
 
   return (
-    <div>
-      <h1>KYC Status</h1>
-      <p className={getStatusColor()}>{getStatusMessage()}</p>
-      {/* Other component code */}
+    <div className="max-w-lg mx-auto bg-stone-900 text-white p-6 rounded-lg">
+      <h1 className="text-2xl font-bold mb-4">KYC Verification</h1>
+
+      {/* KYC Status */}
+      <div className="mb-4">
+        <p className={`text-lg font-semibold ${getStatusColor()}`}>
+          KYC Status: {getStatusMessage()}
+        </p>
+      </div>
+
+      {/* Show form only if KYC is not verified */}
+      {kycStatus !== "verified" && kycStatus !== "approved" && (
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="idType" className="block mb-2">Select ID Type</label>
+            <select
+              id="idType"
+              value={idType}
+              onChange={(e) => setIdType(e.target.value)}
+              className="w-full bg-stone-800 text-white rounded p-2"
+            >
+              <option value="">-- Select ID Type --</option>
+              <option value="passport">Passport</option>
+              <option value="driver_license">Driver's License</option>
+              <option value="national_id">National ID</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="frontFile" className="block mb-2">Upload Front Image</label>
+            <input
+              type="file"
+              id="frontFile"
+              ref={frontFileRef}
+              accept="image/*"
+              className="block w-full bg-stone-800 text-white rounded p-2"
+            />
+          </div>
+          <div>
+            <label htmlFor="backFile" className="block mb-2">Upload Back Image</label>
+            <input
+              type="file"
+              id="backFile"
+              ref={backFileRef}
+              accept="image/*"
+              className="block w-full bg-stone-800 text-white rounded p-2"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 disabled:opacity-50"
+          >
+            {loading ? "Submitting..." : "Submit KYC"}
+          </button>
+        </form>
+      )}
+
+      {error && <p className="text-red-500 mt-4">{error}</p>}
+      {success && <p className="text-green-500 mt-4">KYC submitted successfully!</p>}
     </div>
   );
 };
