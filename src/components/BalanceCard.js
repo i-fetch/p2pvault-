@@ -138,6 +138,11 @@ const BalanceCard = ({ userTier = "Basic Level" }) => {
           </span>
         </div>
 
+        <div className="mb-3">
+          <p className="text-sm font-semibold">User Level: {userTier}</p>
+          <p className="text-sm font-semibold">Minimum Withdrawal: $50,000</p>
+        </div>
+
         <div className="flex flex-wrap justify-center gap-2 mt-4">
           <button
             onClick={handleTransactionHistoryClick}

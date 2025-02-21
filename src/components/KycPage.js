@@ -132,7 +132,7 @@ const KycPage = () => {
       case "error":
         return "Error fetching status.";
       case "unknown":
-        return "verified";
+        return "Unknown status.";
       default:
         return "Loading status...";
     }
@@ -153,7 +153,7 @@ const KycPage = () => {
       case "error":
         return "text-red-500";
       case "unknown":
-        return "text-green-500";
+        return "text-gray-500";
       default:
         return "text-gray-500";
     }
