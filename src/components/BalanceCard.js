@@ -139,7 +139,6 @@ const BalanceCard = ({ userTier = "Basic Level" }) => {
         </div>
 
         <div className="mb-3">
-          <p className="text-sm font-semibold">User Level: {userTier}</p>
           <p className="text-sm font-semibold">Minimum Withdrawal: $50,000</p>
         </div>
 
